@@ -33,3 +33,18 @@ def test_historical_ledgers_have_no_destructive_routes() -> None:
     history = paths["/api/v1/campaigns/{campaign_id}/families/{family_id}/history"]
     assert "patch" not in history
     assert "delete" not in history
+
+
+def test_openapi_is_ready_for_chatgpt_actions() -> None:
+    schema = app.openapi()
+    assert schema["components"]["securitySchemes"]["ApiKeyAuth"]["name"] == "X-API-Key"
+    assert schema["security"] == [{"ApiKeyAuth": []}]
+    operation_ids = [
+        operation["operationId"]
+        for path in schema["paths"].values()
+        for operation in path.values()
+        if isinstance(operation, dict) and "operationId" in operation
+    ]
+    assert len(operation_ids) == len(set(operation_ids))
+    assert schema["servers"][0]["url"]
+    assert schema["x-chatgpt-instructions"]["rules"]

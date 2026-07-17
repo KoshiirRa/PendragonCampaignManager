@@ -16,6 +16,7 @@ from app.api.routes import (
 )
 from app.config import settings
 from app.database import engine
+from app.openapi import build_openapi
 from app.security import APIKeyMiddleware
 
 
@@ -30,6 +31,8 @@ app = FastAPI(
     description="Persistent multi-generational campaign memory for Pendragon 6th Edition.",
     version="0.1.0",
     lifespan=lifespan,
+    servers=[{"url": settings.public_base_url, "description": "Pendragon Campaign API"}],
+    generate_unique_id_function=lambda route: route.name,
 )
 app.add_middleware(APIKeyMiddleware, api_key=settings.api_key)
 app.add_middleware(
@@ -63,3 +66,6 @@ async def ready() -> Response:
             content={"status": "unavailable"},
         )
     return JSONResponse(content={"status": "ready"})
+
+
+app.openapi = lambda: build_openapi(app)

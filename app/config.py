@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     api_prefix: str = "/api/v1"
     api_key: SecretStr | None = None
     cors_origins: str = ""
+    public_base_url: str = "http://localhost:8000"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
