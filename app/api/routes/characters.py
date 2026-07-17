@@ -12,6 +12,8 @@ from app.schemas.character import (
     CharacterStatusCreate,
     CharacterStatusRead,
     CharacterUpdate,
+    FoundryCharacterSnapshot,
+    FoundryCharacterSyncResult,
     GloryCreate,
     GloryRead,
     GlorySummary,
@@ -173,3 +175,21 @@ async def glory_summary(campaign_id: UUID, character_id: UUID, db: DB, include_g
 )
 async def add_glory(campaign_id: UUID, character_id: UUID, data: GloryCreate, db: DB):
     return await service.add_glory(db, campaign_id, character_id, data)
+
+
+@router.post(
+    "/characters/{character_id}/foundry-snapshot",
+    response_model=FoundryCharacterSyncResult,
+    summary="Synchronize a Foundry VTT character snapshot",
+    description=(
+        "Append only trait, skill, passion, and Glory changes from Foundry VTT. "
+        "Submitting an unchanged snapshot creates no new historical rows."
+    ),
+)
+async def sync_foundry_snapshot(
+    campaign_id: UUID,
+    character_id: UUID,
+    data: FoundryCharacterSnapshot,
+    db: DB,
+):
+    return await service.sync_foundry_snapshot(db, campaign_id, character_id, data)

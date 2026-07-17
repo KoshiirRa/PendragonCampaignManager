@@ -115,6 +115,7 @@ class TraitDefinition(UUIDPrimaryKeyMixin, Base):
     name: Mapped[str] = mapped_column(Text)
     opposed_name: Mapped[str] = mapped_column(Text)
     description: Mapped[str | None] = mapped_column(Text)
+    source_key: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime]
 
 
@@ -146,6 +147,7 @@ class SkillDefinition(UUIDPrimaryKeyMixin, Base):
     name: Mapped[str] = mapped_column(Text)
     category: Mapped[str] = mapped_column(Text, default="ordinary")
     description: Mapped[str | None] = mapped_column(Text)
+    source_key: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime]
 
 
@@ -175,6 +177,7 @@ class CharacterPassion(UUIDPrimaryKeyMixin, Base):
     character_id: Mapped[UUID] = mapped_column(ForeignKey("characters.id", ondelete="RESTRICT"))
     name: Mapped[str] = mapped_column(Text)
     subject_text: Mapped[str | None] = mapped_column(Text)
+    source_key: Mapped[str | None] = mapped_column(Text)
     related_character_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("characters.id", ondelete="RESTRICT")
     )

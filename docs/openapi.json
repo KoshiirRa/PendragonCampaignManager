@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app",
+      "url": "http://localhost:8000",
       "description": "Pendragon Campaign API"
     }
   ],
@@ -1653,6 +1653,70 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GloryRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaigns/{campaign_id}/characters/{character_id}/foundry-snapshot": {
+      "post": {
+        "tags": [
+          "characters"
+        ],
+        "summary": "Synchronize a Foundry VTT character snapshot",
+        "description": "Append only trait, skill, passion, and Glory changes from Foundry VTT. Submitting an unchanged snapshot creates no new historical rows.",
+        "operationId": "sync_foundry_snapshot",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Campaign Id"
+            }
+          },
+          {
+            "name": "character_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Character Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoundryCharacterSnapshot"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoundryCharacterSyncResult"
                 }
               }
             }
@@ -5326,6 +5390,224 @@
           "updated_at"
         ],
         "title": "FamilyRead"
+      },
+      "FoundryCharacterSnapshot": {
+        "properties": {
+          "effective_year": {
+            "type": "integer",
+            "maximum": 9999.0,
+            "minimum": 1.0,
+            "title": "Effective Year"
+          },
+          "traits": {
+            "items": {
+              "$ref": "#/components/schemas/FoundryTraitSnapshot"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Traits"
+          },
+          "skills": {
+            "items": {
+              "$ref": "#/components/schemas/FoundrySkillSnapshot"
+            },
+            "type": "array",
+            "maxItems": 300,
+            "title": "Skills"
+          },
+          "passions": {
+            "items": {
+              "$ref": "#/components/schemas/FoundryPassionSnapshot"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Passions"
+          },
+          "glory_total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Glory Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "effective_year",
+          "glory_total"
+        ],
+        "title": "FoundryCharacterSnapshot"
+      },
+      "FoundryCharacterSyncResult": {
+        "properties": {
+          "character_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Character Id"
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Id"
+          },
+          "trait_entries_added": {
+            "type": "integer",
+            "title": "Trait Entries Added"
+          },
+          "skill_entries_added": {
+            "type": "integer",
+            "title": "Skill Entries Added"
+          },
+          "passions_created": {
+            "type": "integer",
+            "title": "Passions Created"
+          },
+          "passion_entries_added": {
+            "type": "integer",
+            "title": "Passion Entries Added"
+          },
+          "glory_adjustment": {
+            "type": "integer",
+            "title": "Glory Adjustment"
+          },
+          "changed": {
+            "type": "boolean",
+            "title": "Changed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "character_id",
+          "event_id",
+          "trait_entries_added",
+          "skill_entries_added",
+          "passions_created",
+          "passion_entries_added",
+          "glory_adjustment",
+          "changed"
+        ],
+        "title": "FoundryCharacterSyncResult"
+      },
+      "FoundryPassionSnapshot": {
+        "properties": {
+          "source_key": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Source Key"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "subject_text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Text"
+          },
+          "value": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_key",
+          "name",
+          "value"
+        ],
+        "title": "FoundryPassionSnapshot"
+      },
+      "FoundrySkillSnapshot": {
+        "properties": {
+          "source_key": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Source Key"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Category",
+            "default": "ordinary"
+          },
+          "value": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_key",
+          "name",
+          "value"
+        ],
+        "title": "FoundrySkillSnapshot"
+      },
+      "FoundryTraitSnapshot": {
+        "properties": {
+          "source_key": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Source Key"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "opposed_name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Opposed Name"
+          },
+          "value": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Value"
+          },
+          "opposed_value": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Opposed Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_key",
+          "name",
+          "opposed_name",
+          "value",
+          "opposed_value"
+        ],
+        "title": "FoundryTraitSnapshot"
       },
       "GloryCreate": {
         "properties": {

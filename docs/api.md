@@ -16,11 +16,24 @@ The character and estate slice additionally exposes:
 - campaign trait and skill definitions;
 - append-only trait, skill, passion, and Glory entries;
 - computed Glory summaries;
+- idempotent Foundry VTT character snapshots for traits, skills, passions, and Glory;
 - location list, create, read, update, and archive;
 - manor creation, tenure history, and improvement history.
 
 Historical timeline events and dice logs intentionally have no update or delete endpoints. Corrections are appended as superseding events.
 The same rule applies to character-value, Glory, tenure, and improvement ledgers.
+
+## Foundry character synchronization
+
+`POST /api/v1/campaigns/{campaign_id}/characters/{character_id}/foundry-snapshot` accepts the
+current in-game year, all current trait/skill/passion values, and total Glory. Stable Foundry PID
+or Item UUID source keys identify definitions across repeated requests. The service appends only
+values that differ from the latest ledger state and reconciles Glory with a signed ledger entry.
+An unchanged snapshot returns `changed: false` and creates no event or ledger rows.
+
+When a snapshot changes history, the service creates one `foundry_character_sync` event and links
+every new ledger entry to it. This endpoint is intended for machine synchronization; ordinary
+historical edits should continue to use the individual append-only ledger endpoints.
 # Family and ancestral-history API
 
 Family endpoints live under `/api/v1/campaigns/{campaign_id}`. Create and list families, add memberships and parentage, record marriages, open inheritance cases, register heirs, and transfer manors through the corresponding nested resources.

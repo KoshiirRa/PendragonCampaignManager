@@ -10,6 +10,10 @@ erDiagram
     CAMPAIGN_SESSIONS o|--o{ DICE_LOGS : includes
     EVENTS o|--o{ DICE_LOGS : contextualizes
     EVENTS o|--o{ EVENTS : supersedes
+    EVENTS o|--o{ CHARACTER_TRAIT_LEDGER : records
+    EVENTS o|--o{ CHARACTER_SKILL_LEDGER : records
+    EVENTS o|--o{ CHARACTER_PASSION_LEDGER : records
+    EVENTS o|--o{ GLORY_LEDGER : records
     CAMPAIGNS ||--o{ CHARACTERS : contains
     CHARACTERS ||--o{ CHARACTER_STATUS_LEDGER : changes_status
     CHARACTERS ||--o{ CHARACTER_NOTES : documents

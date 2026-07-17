@@ -4,7 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from app.schemas import CampaignCreate, SessionCreate
-from app.schemas.character import CharacterCreate, GloryCreate
+from app.schemas.character import CharacterCreate, FoundryCharacterSnapshot, GloryCreate
 from app.schemas.family import FamilyHistoryCreate, MarriageCreate
 from app.schemas.location import ManorCreate
 
@@ -39,6 +39,22 @@ def test_npc_does_not_require_player_name() -> None:
 def test_glory_entry_must_change_total() -> None:
     with pytest.raises(ValidationError):
         GloryCreate(awarded_year=485, amount=0, reason="No change")
+
+
+def test_foundry_snapshot_rejects_duplicate_item_source_keys() -> None:
+    trait = {
+        "source_key": "i.trait.merciful",
+        "name": "Merciful",
+        "opposed_name": "Vengeful",
+        "value": 12,
+        "opposed_value": 8,
+    }
+    with pytest.raises(ValidationError):
+        FoundryCharacterSnapshot(
+            effective_year=485,
+            traits=[trait, trait],
+            glory_total=100,
+        )
 
 
 def test_manor_requires_manor_location_kind() -> None:

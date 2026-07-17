@@ -27,6 +27,13 @@ Characters use one table for player knights and NPCs so relationships, events, o
 
 Traits, skills, passions, Glory, and manor improvements use append-only ledgers. Current values are reconstructed by ordering effective year, sequence, and recording time. Corrections therefore add entries rather than rewriting earlier campaign history.
 
+Foundry synchronization preserves the source Item PID or UUID in nullable `source_key` columns on
+trait definitions, skill definitions, and character passions. Partial unique indexes keep those
+external identities unique without requiring manually entered records to have an external key.
+Snapshot synchronization compares against the latest ledger row and records only changed values.
+Foundry's calculated total Glory is converted into a signed reconciliation entry rather than
+replacing the Glory ledger.
+
 Knowledge-bearing records use `knowledge_scope`:
 
 - `gm_only` is restricted to the Gamemaster;

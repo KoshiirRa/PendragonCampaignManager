@@ -210,3 +210,56 @@ class GlorySummary(ORMModel):
     character_id: UUID
     total: int
     entries: list[GloryRead]
+
+
+class FoundryTraitSnapshot(ORMModel):
+    source_key: str = Field(min_length=1, max_length=500)
+    name: str = Field(min_length=1, max_length=100)
+    opposed_name: str = Field(min_length=1, max_length=100)
+    value: int = Field(ge=0)
+    opposed_value: int = Field(ge=0)
+
+
+class FoundrySkillSnapshot(ORMModel):
+    source_key: str = Field(min_length=1, max_length=500)
+    name: str = Field(min_length=1, max_length=100)
+    category: str = Field(default="ordinary", min_length=1, max_length=100)
+    value: int = Field(ge=0)
+
+
+class FoundryPassionSnapshot(ORMModel):
+    source_key: str = Field(min_length=1, max_length=500)
+    name: str = Field(min_length=1, max_length=150)
+    subject_text: str | None = Field(default=None, max_length=300)
+    value: int = Field(ge=0)
+
+
+class FoundryCharacterSnapshot(ORMModel):
+    effective_year: int = Field(ge=1, le=9999)
+    traits: list[FoundryTraitSnapshot] = Field(default_factory=list, max_length=100)
+    skills: list[FoundrySkillSnapshot] = Field(default_factory=list, max_length=300)
+    passions: list[FoundryPassionSnapshot] = Field(default_factory=list, max_length=100)
+    glory_total: int = Field(ge=0)
+
+    @model_validator(mode="after")
+    def unique_source_keys(self) -> "FoundryCharacterSnapshot":
+        for label, values in (
+            ("trait", self.traits),
+            ("skill", self.skills),
+            ("passion", self.passions),
+        ):
+            keys = [value.source_key for value in values]
+            if len(keys) != len(set(keys)):
+                raise ValueError(f"duplicate {label} source_key")
+        return self
+
+
+class FoundryCharacterSyncResult(ORMModel):
+    character_id: UUID
+    event_id: UUID | None
+    trait_entries_added: int
+    skill_entries_added: int
+    passions_created: int
+    passion_entries_added: int
+    glory_adjustment: int
+    changed: bool

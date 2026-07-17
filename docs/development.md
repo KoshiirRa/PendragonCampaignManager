@@ -9,5 +9,10 @@ ruff check .
 pytest
 ```
 
-The SQL migrations remain the deployment source of truth for Supabase. Alembic owns model-drift detection and future generated revisions; never edit an already deployed numbered migration.
+Export the committed API contract after changing routes or schemas:
 
+```powershell
+py -3.12 scripts/export_openapi.py
+```
+
+The SQL migrations remain the deployment source of truth for Supabase. Alembic owns model-drift detection and future generated revisions; never edit an already deployed numbered migration.

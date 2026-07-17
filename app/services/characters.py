@@ -14,7 +14,10 @@ from app.models import (
     CharacterSkillLedger,
     CharacterStatusLedger,
     CharacterTraitLedger,
+    Event,
+    EventLink,
     GloryLedger,
+    KnowledgeScope,
     SkillDefinition,
     TraitDefinition,
 )
@@ -23,6 +26,8 @@ from app.schemas.character import (
     CharacterNoteCreate,
     CharacterStatusCreate,
     CharacterUpdate,
+    FoundryCharacterSnapshot,
+    FoundryCharacterSyncResult,
     GloryCreate,
     PassionCreate,
     PassionLedgerCreate,
@@ -297,3 +302,228 @@ async def glory_summary(
         select(func.coalesce(func.sum(GloryLedger.amount), 0)).where(*condition)
     )
     return entries, int(total or 0)
+
+
+async def sync_foundry_snapshot(
+    db: AsyncSession,
+    campaign_id: UUID,
+    character_id: UUID,
+    data: FoundryCharacterSnapshot,
+) -> FoundryCharacterSyncResult:
+    character = await get_character(db, campaign_id, character_id)
+    reason = "Foundry VTT character synchronization"
+    pending: list[Any] = []
+
+    trait_definitions = list(
+        await db.scalars(select(TraitDefinition).where(TraitDefinition.campaign_id == campaign_id))
+    )
+    trait_by_source = {item.source_key: item for item in trait_definitions if item.source_key}
+    trait_by_name = {item.name.casefold(): item for item in trait_definitions}
+    latest_traits = await _latest_by_key(
+        db,
+        CharacterTraitLedger,
+        CharacterTraitLedger.trait_definition_id,
+        CharacterTraitLedger.character_id == character_id,
+    )
+    trait_added = 0
+    for snapshot in data.traits:
+        definition = trait_by_source.get(snapshot.source_key) or trait_by_name.get(
+            snapshot.name.casefold()
+        )
+        if definition is None:
+            definition = TraitDefinition(
+                campaign_id=campaign_id,
+                source_key=snapshot.source_key,
+                name=snapshot.name,
+                opposed_name=snapshot.opposed_name,
+            )
+            db.add(definition)
+            await db.flush()
+            trait_by_source[snapshot.source_key] = definition
+        elif definition.source_key is None:
+            definition.source_key = snapshot.source_key
+        previous = latest_traits.get(definition.id)
+        if previous and (previous.trait_value, previous.opposed_value) == (
+            snapshot.value,
+            snapshot.opposed_value,
+        ):
+            continue
+        pending.append(
+            CharacterTraitLedger(
+                campaign_id=campaign_id,
+                character_id=character_id,
+                trait_definition_id=definition.id,
+                effective_year=data.effective_year,
+                trait_value=snapshot.value,
+                opposed_value=snapshot.opposed_value,
+                reason=reason,
+            )
+        )
+        trait_added += 1
+
+    skill_definitions = list(
+        await db.scalars(select(SkillDefinition).where(SkillDefinition.campaign_id == campaign_id))
+    )
+    skill_by_source = {item.source_key: item for item in skill_definitions if item.source_key}
+    skill_by_name = {item.name.casefold(): item for item in skill_definitions}
+    latest_skills = await _latest_by_key(
+        db,
+        CharacterSkillLedger,
+        CharacterSkillLedger.skill_definition_id,
+        CharacterSkillLedger.character_id == character_id,
+    )
+    skill_added = 0
+    for snapshot in data.skills:
+        definition = skill_by_source.get(snapshot.source_key) or skill_by_name.get(
+            snapshot.name.casefold()
+        )
+        if definition is None:
+            definition = SkillDefinition(
+                campaign_id=campaign_id,
+                source_key=snapshot.source_key,
+                name=snapshot.name,
+                category=snapshot.category,
+            )
+            db.add(definition)
+            await db.flush()
+            skill_by_source[snapshot.source_key] = definition
+        elif definition.source_key is None:
+            definition.source_key = snapshot.source_key
+        previous = latest_skills.get(definition.id)
+        if previous and previous.value == snapshot.value:
+            continue
+        pending.append(
+            CharacterSkillLedger(
+                campaign_id=campaign_id,
+                character_id=character_id,
+                skill_definition_id=definition.id,
+                effective_year=data.effective_year,
+                value=snapshot.value,
+                reason=reason,
+            )
+        )
+        skill_added += 1
+
+    passions = list(
+        await db.scalars(
+            select(CharacterPassion).where(CharacterPassion.character_id == character_id)
+        )
+    )
+    passion_by_source = {item.source_key: item for item in passions if item.source_key}
+    latest_passions = (
+        await _latest_by_key(
+            db,
+            CharacterPassionLedger,
+            CharacterPassionLedger.passion_id,
+            CharacterPassionLedger.passion_id.in_([item.id for item in passions]),
+        )
+        if passions
+        else {}
+    )
+    passions_created = 0
+    passion_added = 0
+    for snapshot in data.passions:
+        passion = passion_by_source.get(snapshot.source_key)
+        if passion is None:
+            passion = CharacterPassion(
+                campaign_id=campaign_id,
+                character_id=character_id,
+                source_key=snapshot.source_key,
+                name=snapshot.name,
+                subject_text=snapshot.subject_text,
+                scope=KnowledgeScope.PLAYERS,
+                started_year=data.effective_year,
+            )
+            db.add(passion)
+            await db.flush()
+            passion_by_source[snapshot.source_key] = passion
+            passions_created += 1
+        previous = latest_passions.get(passion.id)
+        if previous and previous.value == snapshot.value:
+            continue
+        pending.append(
+            CharacterPassionLedger(
+                campaign_id=campaign_id,
+                passion_id=passion.id,
+                effective_year=data.effective_year,
+                value=snapshot.value,
+                reason=reason,
+            )
+        )
+        passion_added += 1
+
+    current_glory = int(
+        await db.scalar(
+            select(func.coalesce(func.sum(GloryLedger.amount), 0)).where(
+                GloryLedger.character_id == character_id
+            )
+        )
+        or 0
+    )
+    glory_adjustment = data.glory_total - current_glory
+    if glory_adjustment:
+        pending.append(
+            GloryLedger(
+                campaign_id=campaign_id,
+                character_id=character_id,
+                awarded_year=data.effective_year,
+                amount=glory_adjustment,
+                category="foundry_sync",
+                reason="Foundry VTT total Glory reconciliation",
+                scope=KnowledgeScope.PLAYERS,
+            )
+        )
+
+    event = None
+    if pending:
+        event = Event(
+            campaign_id=campaign_id,
+            event_type="foundry_character_sync",
+            title=f"Synchronized {character.name} from Foundry VTT",
+            description=(
+                f"Recorded {trait_added} trait, {skill_added} skill, "
+                f"{passion_added} passion, and Glory {glory_adjustment:+d} changes."
+            ),
+            in_game_year=data.effective_year,
+            visibility="players",
+            metadata_={"source": "foundry_vtt", "foundry_uuid": character.foundry_uuid},
+        )
+        db.add(event)
+        db.add(EventLink(event_id=event.id, entity_type="character", entity_id=character_id))
+        for item in pending:
+            item.event_id = event.id
+            db.add(item)
+    try:
+        await db.commit()
+    except IntegrityError as exc:
+        await db.rollback()
+        raise ConflictError("Foundry snapshot conflicts with existing character data") from exc
+    return FoundryCharacterSyncResult(
+        character_id=character_id,
+        event_id=event.id if event else None,
+        trait_entries_added=trait_added,
+        skill_entries_added=skill_added,
+        passions_created=passions_created,
+        passion_entries_added=passion_added,
+        glory_adjustment=glory_adjustment,
+        changed=bool(pending),
+    )
+
+
+async def _latest_by_key(db: AsyncSession, model: type[Any], key: Any, condition: Any) -> dict:
+    rows = list(
+        await db.scalars(
+            select(model)
+            .where(condition)
+            .order_by(
+                key,
+                model.effective_year.desc(),
+                model.sequence.desc(),
+                model.recorded_at.desc(),
+            )
+        )
+    )
+    latest = {}
+    for row in rows:
+        latest.setdefault(getattr(row, key.key), row)
+    return latest

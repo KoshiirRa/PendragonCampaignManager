@@ -9,6 +9,7 @@ def test_openapi_contains_foundation_routes() -> None:
     assert "/api/v1/campaigns/{campaign_id}/dice-logs" in paths
     assert "/api/v1/campaigns/{campaign_id}/characters" in paths
     assert "/api/v1/campaigns/{campaign_id}/characters/{character_id}/glory" in paths
+    assert "/api/v1/campaigns/{campaign_id}/characters/{character_id}/foundry-snapshot" in paths
     assert "/api/v1/campaigns/{campaign_id}/locations" in paths
     assert "/api/v1/campaigns/{campaign_id}/manors" in paths
     assert "/api/v1/campaigns/{campaign_id}/families" in paths
@@ -30,6 +31,8 @@ def test_historical_ledgers_have_no_destructive_routes() -> None:
     glory = paths["/api/v1/campaigns/{campaign_id}/characters/{character_id}/glory"]
     assert "patch" not in glory
     assert "delete" not in glory
+    snapshot = paths["/api/v1/campaigns/{campaign_id}/characters/{character_id}/foundry-snapshot"]
+    assert set(snapshot) == {"post"}
     history = paths["/api/v1/campaigns/{campaign_id}/families/{family_id}/history"]
     assert "patch" not in history
     assert "delete" not in history
