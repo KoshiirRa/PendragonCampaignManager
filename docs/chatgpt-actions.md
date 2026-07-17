@@ -2,6 +2,8 @@
 
 This API is the persistent campaign memory used by a Pendragon Gamemaster. ChatGPT should read the OpenAPI schema for exact request and response fields, then use the rules and workflows below when selecting actions.
 
+For step-by-step configuration in the Custom GPT editor, see [Connect a Custom GPT to the Pendragon Campaign API](custom-gpt-setup.md).
+
 ## Action configuration
 
 - OpenAPI URL: `https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi.json`
