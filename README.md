@@ -28,5 +28,6 @@ psql $env:DATABASE_URL -f seed/001_campaign.sql
 uvicorn app.main:app --reload
 ```
 
-See [schema documentation](docs/schema.md), the [ER diagram](docs/er-diagram.md), [API notes](docs/api.md), and the [development guide](docs/development.md).
+See [schema documentation](docs/schema.md), the [ER diagram](docs/er-diagram.md), [API notes](docs/api.md), the [Supabase workflow](docs/supabase.md), and the [development guide](docs/development.md).
 
+For containerized hosting, secrets, migration jobs, and the deployment pipeline, see the [Google Cloud Run deployment guide](docs/cloud-run.md).

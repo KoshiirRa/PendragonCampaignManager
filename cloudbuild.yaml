@@ -1,0 +1,67 @@
+substitutions:
+  _REGION: us-central1
+  _SERVICE: pendragon-campaign-api
+  _REPOSITORY: pendragon
+  _CORS_ORIGINS: ""
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --tag
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_SERVICE}:${SHORT_SHA}
+      - .
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_SERVICE}:${SHORT_SHA}
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - jobs
+      - deploy
+      - ${_SERVICE}-migrate
+      - --image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_SERVICE}:${SHORT_SHA}
+      - --region=${_REGION}
+      - --service-account=${_SERVICE}@${PROJECT_ID}.iam.gserviceaccount.com
+      - --set-env-vars=APP_ENV=migration
+      - --set-secrets=DATABASE_URL=pendragon-database-url:latest
+      - --command=python
+      - --args=-m,alembic,upgrade,head
+      - --tasks=1
+      - --max-retries=0
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - jobs
+      - execute
+      - ${_SERVICE}-migrate
+      - --region=${_REGION}
+      - --wait
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_SERVICE}:${SHORT_SHA}
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+      - --service-account=${_SERVICE}@${PROJECT_ID}.iam.gserviceaccount.com
+      - --set-env-vars=APP_ENV=production,CORS_ORIGINS=${_CORS_ORIGINS}
+      - --set-secrets=DATABASE_URL=pendragon-database-url:latest,API_KEY=pendragon-api-key:latest
+      - --min-instances=0
+      - --max-instances=2
+      - --concurrency=20
+      - --memory=512Mi
+      - --cpu=1
+      - --startup-probe=httpGet.path=/health,initialDelaySeconds=0,timeoutSeconds=2,periodSeconds=5,failureThreshold=12
+
+images:
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_SERVICE}:${SHORT_SHA}
+
+options:
+  logging: CLOUD_LOGGING_ONLY

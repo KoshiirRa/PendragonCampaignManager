@@ -1,5 +1,56 @@
 from app.models.base import Base
 from app.models.campaign import Campaign, CampaignSession
+from app.models.character import (
+    Character,
+    CharacterKind,
+    CharacterNote,
+    CharacterPassion,
+    CharacterPassionLedger,
+    CharacterSkillLedger,
+    CharacterStatus,
+    CharacterStatusLedger,
+    CharacterTraitLedger,
+    GloryLedger,
+    KnowledgeScope,
+    SkillDefinition,
+    TraitDefinition,
+)
 from app.models.event import DiceLog, Event, EventLink
+from app.models.location import (
+    Location,
+    LocationConnection,
+    LocationKind,
+    Manor,
+    ManorImprovement,
+    ManorImprovementLedger,
+    ManorTenure,
+)
 
-__all__ = ["Base", "Campaign", "CampaignSession", "DiceLog", "Event", "EventLink"]
+__all__ = [
+    "Base",
+    "Campaign",
+    "CampaignSession",
+    "Character",
+    "CharacterKind",
+    "CharacterNote",
+    "CharacterPassion",
+    "CharacterPassionLedger",
+    "CharacterSkillLedger",
+    "CharacterStatus",
+    "CharacterStatusLedger",
+    "CharacterTraitLedger",
+    "DiceLog",
+    "Event",
+    "EventLink",
+    "GloryLedger",
+    "KnowledgeScope",
+    "Location",
+    "LocationConnection",
+    "LocationKind",
+    "Manor",
+    "ManorImprovement",
+    "ManorImprovementLedger",
+    "ManorTenure",
+    "SkillDefinition",
+    "TraitDefinition",
+]

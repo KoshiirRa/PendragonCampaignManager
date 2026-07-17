@@ -9,5 +9,15 @@ The first slice exposes:
 - timeline event list and create, with optional in-game year filtering;
 - dice-log creation.
 
-Historical timeline events and dice logs intentionally have no update or delete endpoints. Corrections are appended as superseding events.
+The character and estate slice additionally exposes:
 
+- player-knight and NPC list, create, read, update, and archive;
+- knowledge-scoped character notes;
+- campaign trait and skill definitions;
+- append-only trait, skill, passion, and Glory entries;
+- computed Glory summaries;
+- location list, create, read, update, and archive;
+- manor creation, tenure history, and improvement history.
+
+Historical timeline events and dice logs intentionally have no update or delete endpoints. Corrections are appended as superseding events.
+The same rule applies to character-value, Glory, tenure, and improvement ledgers.
