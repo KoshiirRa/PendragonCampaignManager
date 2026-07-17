@@ -22,3 +22,19 @@ def test_dockerfile_uses_cloud_run_port_and_non_root_user() -> None:
     assert "0.0.0.0" in dockerfile
     assert "${PORT:-8080}" in dockerfile
     assert "USER app" in dockerfile
+
+
+def test_cloud_build_configures_foundry_cors_origins() -> None:
+    config = yaml.safe_load(Path("cloudbuild.yaml").read_text(encoding="utf-8"))
+    origins = config["substitutions"]["_CORS_ORIGINS"].split(",")
+    assert origins == [
+        "https://pendragon.dwarvenbard.com",
+        "https://foundry.starfleetengineers.com",
+    ]
+    deploy_args = next(
+        step["args"]
+        for step in config["steps"]
+        if step["args"][:3] == ["run", "deploy", "${_SERVICE}"]
+    )
+    env_flag = next(argument for argument in deploy_args if argument.startswith("--set-env-vars="))
+    assert env_flag.startswith("--set-env-vars=^@^")

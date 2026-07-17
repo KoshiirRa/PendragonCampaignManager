@@ -58,7 +58,12 @@ Submit from the repository root. Supply the exact Foundry origin that browsers u
 gcloud builds submit --config cloudbuild.yaml --substitutions="_REGION=us-central1,_CORS_ORIGINS=https://foundry.example.com"
 ```
 
-An empty CORS origin is the safe default and prevents browser cross-origin API calls. To allow several origins, update the Cloud Run service directly because commas also delimit Cloud Build substitutions.
+The deployment currently allows browser requests from the two configured Foundry origins:
+
+- `https://pendragon.dwarvenbard.com`
+- `https://foundry.starfleetengineers.com`
+
+Cloud Build uses an alternate delimiter for its environment-variable flag so the comma-separated `CORS_ORIGINS` value reaches FastAPI unchanged. Add future Foundry origins to `_CORS_ORIGINS` without paths or trailing slashes.
 
 After deployment:
 

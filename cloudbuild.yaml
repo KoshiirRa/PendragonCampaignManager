@@ -2,7 +2,7 @@ substitutions:
   _REGION: us-central1
   _SERVICE: pendragon-campaign-api
   _REPOSITORY: pendragon
-  _CORS_ORIGINS: ""
+  _CORS_ORIGINS: https://pendragon.dwarvenbard.com,https://foundry.starfleetengineers.com
   _PUBLIC_BASE_URL: https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app
 
 steps:
@@ -52,7 +52,7 @@ steps:
       - --platform=managed
       - --allow-unauthenticated
       - --service-account=${_SERVICE}@${PROJECT_ID}.iam.gserviceaccount.com
-      - --set-env-vars=APP_ENV=production,CORS_ORIGINS=${_CORS_ORIGINS},PUBLIC_BASE_URL=${_PUBLIC_BASE_URL}
+      - --set-env-vars=^@^APP_ENV=production@CORS_ORIGINS=${_CORS_ORIGINS}@PUBLIC_BASE_URL=${_PUBLIC_BASE_URL}
       - --set-secrets=DATABASE_URL=pendragon-database-url:latest,API_KEY=pendragon-api-key:latest
       - --min-instances=0
       - --max-instances=2
