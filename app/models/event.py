@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, Integer, SmallInteger, String, Text
+from sqlalchemy import ForeignKey, Integer, SmallInteger, String, Text, func
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -24,7 +24,7 @@ class Event(UUIDPrimaryKeyMixin, Base):
     sequence: Mapped[int] = mapped_column(Integer, default=0)
     visibility: Mapped[str] = mapped_column(String, default="players")
     occurred_at: Mapped[datetime | None]
-    recorded_at: Mapped[datetime]
+    recorded_at: Mapped[datetime] = mapped_column(server_default=func.now())
     supersedes_event_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("events.id", ondelete="RESTRICT")
     )
@@ -38,7 +38,7 @@ class EventLink(UUIDPrimaryKeyMixin, Base):
     entity_type: Mapped[str] = mapped_column(String)
     entity_id: Mapped[UUID]
     role: Mapped[str] = mapped_column(String, default="subject")
-    created_at: Mapped[datetime]
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class DiceLog(UUIDPrimaryKeyMixin, Base):
@@ -58,5 +58,5 @@ class DiceLog(UUIDPrimaryKeyMixin, Base):
     target_number: Mapped[int | None] = mapped_column(SmallInteger)
     outcome: Mapped[str | None] = mapped_column(String)
     purpose: Mapped[str | None] = mapped_column(Text)
-    rolled_at: Mapped[datetime]
+    rolled_at: Mapped[datetime] = mapped_column(server_default=func.now())
     metadata_: Mapped[dict[str, Any]] = mapped_column("metadata", JSONB, default=dict)

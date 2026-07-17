@@ -59,3 +59,23 @@ Locations form a campaign-scoped hierarchy and may also have graph connections f
 Cross-domain integrity that cannot be expressed by a simple foreign key (for example, confirming a session and event belong to the same campaign) is enforced in the service layer. Supabase Row Level Security policies will be introduced with authentication, rather than shipping permissive placeholder policies.
 
 The attached legacy archive design treated Markdown as canonical. In this backend, normalized PostgreSQL records are canonical; future Markdown and ZIP archives will be reproducible, scope-filtered exports.
+
+## Families, inheritance, and ancestral history
+
+Families are stable campaign entities, while membership, parentage, and marriage are effective-dated historical records. Parentage supports biological, adoptive, foster, and user-defined relationship types without forcing uncertain genealogy into a confirmed fact; `certainty` and `knowledge_scope` preserve that distinction.
+
+Inheritance is represented as a case with candidate heirs and explicit asset transfers. Recording an inherited manor closes its current tenure and opens the beneficiary's tenure in the same database transaction, linked to the transfer event.
+
+`family_history_entries` supports year-by-year ancestral histories before or after 480. Every entry creates a central event and may link an ancestor, realm, source citation, dice log, and Glory ledger entry. Source title, edition, locator, summary, roll results, and arbitrary metadata are user-entered fields. The application contains no sourcebook prose or built-in sourcebook tables.
+
+| Table | Purpose |
+|---|---|
+| `families` | Named dynasties and branches within a campaign |
+| `family_memberships` | Effective-dated character affiliation |
+| `character_parentage` | Typed and certainty-qualified ancestry links |
+| `marriages` | Effective-dated unions with start/end events |
+| `inheritance_cases` | Estate resolution following a death |
+| `inheritance_heirs` | Candidate, designated, accepted, or rejected claims |
+| `inheritance_manor_transfers` | Event-backed inherited manor transfers |
+| `source_references` | Campaign-owned citations to books or other sources |
+| `family_history_entries` | Event-backed ancestral timeline entries and optional Glory |

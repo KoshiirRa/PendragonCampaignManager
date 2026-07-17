@@ -18,6 +18,11 @@ MIGRATION_MAP = {
     ROOT / "migrations/007_glory.sql": ROOT / "supabase/migrations/202607170007_glory.sql",
     ROOT / "migrations/008_locations_manors.sql": ROOT
     / "supabase/migrations/202607170008_locations_manors.sql",
+    ROOT / "migrations/009_families.sql": ROOT / "supabase/migrations/202607170009_families.sql",
+    ROOT / "migrations/010_inheritance.sql": ROOT
+    / "supabase/migrations/202607170010_inheritance.sql",
+    ROOT / "migrations/011_ancestral_history.sql": ROOT
+    / "supabase/migrations/202607170011_ancestral_history.sql",
 }
 SEED_SOURCES = (ROOT / "seed/001_campaign.sql", ROOT / "seed/002_characters_and_manor.sql")
 SEED_DESTINATION = ROOT / "supabase/seed.sql"

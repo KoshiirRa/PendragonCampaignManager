@@ -16,6 +16,17 @@ from app.models.character import (
     TraitDefinition,
 )
 from app.models.event import DiceLog, Event, EventLink
+from app.models.family import (
+    CharacterParentage,
+    Family,
+    FamilyHistoryEntry,
+    FamilyMembership,
+    InheritanceCase,
+    InheritanceHeir,
+    InheritanceManorTransfer,
+    Marriage,
+    SourceReference,
+)
 from app.models.location import (
     Location,
     LocationConnection,
@@ -42,8 +53,15 @@ __all__ = [
     "DiceLog",
     "Event",
     "EventLink",
+    "Family",
+    "FamilyHistoryEntry",
+    "FamilyMembership",
     "GloryLedger",
     "KnowledgeScope",
+    "CharacterParentage",
+    "InheritanceCase",
+    "InheritanceHeir",
+    "InheritanceManorTransfer",
     "Location",
     "LocationConnection",
     "LocationKind",
@@ -51,6 +69,8 @@ __all__ = [
     "ManorImprovement",
     "ManorImprovementLedger",
     "ManorTenure",
+    "Marriage",
     "SkillDefinition",
+    "SourceReference",
     "TraitDefinition",
 ]

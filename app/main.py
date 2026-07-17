@@ -7,7 +7,13 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.errors import install_error_handlers
-from app.api.routes import campaigns_router, characters_router, events_router, locations_router
+from app.api.routes import (
+    campaigns_router,
+    characters_router,
+    events_router,
+    families_router,
+    locations_router,
+)
 from app.config import settings
 from app.database import engine
 from app.security import APIKeyMiddleware
@@ -38,6 +44,7 @@ app.include_router(campaigns_router, prefix=settings.api_prefix)
 app.include_router(events_router, prefix=settings.api_prefix)
 app.include_router(characters_router, prefix=settings.api_prefix)
 app.include_router(locations_router, prefix=settings.api_prefix)
+app.include_router(families_router, prefix=settings.api_prefix)
 
 
 @app.get("/health", tags=["operations"])

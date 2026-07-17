@@ -4,7 +4,7 @@ from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import Enum, ForeignKey, Integer, Numeric, SmallInteger, Text
+from sqlalchemy import Enum, ForeignKey, Integer, Numeric, SmallInteger, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -64,7 +64,7 @@ class LocationConnection(UUIDPrimaryKeyMixin, Base):
     relationship_type: Mapped[str] = mapped_column(Text, default="route")
     distance_miles: Mapped[Decimal | None] = mapped_column(Numeric(8, 2))
     notes: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime]
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class Manor(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -98,7 +98,7 @@ class ManorTenure(UUIDPrimaryKeyMixin, Base):
     end_year: Mapped[int | None] = mapped_column(SmallInteger)
     tenure_type: Mapped[str] = mapped_column(Text, default="grant")
     terms: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime]
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class ManorImprovement(UUIDPrimaryKeyMixin, Base):
@@ -109,7 +109,7 @@ class ManorImprovement(UUIDPrimaryKeyMixin, Base):
     name: Mapped[str] = mapped_column(Text)
     improvement_type: Mapped[str] = mapped_column(Text)
     description: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime]
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class ManorImprovementLedger(UUIDPrimaryKeyMixin, Base):

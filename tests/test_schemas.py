@@ -1,8 +1,11 @@
+from uuid import uuid4
+
 import pytest
 from pydantic import ValidationError
 
 from app.schemas import CampaignCreate, SessionCreate
 from app.schemas.character import CharacterCreate, GloryCreate
+from app.schemas.family import FamilyHistoryCreate, MarriageCreate
 from app.schemas.location import ManorCreate
 
 
@@ -41,3 +44,23 @@ def test_glory_entry_must_change_total() -> None:
 def test_manor_requires_manor_location_kind() -> None:
     with pytest.raises(ValidationError):
         ManorCreate(location={"kind": "castle", "name": "Not a manor"})
+
+
+def test_ancestral_history_supports_pre_480_entries() -> None:
+    entry = FamilyHistoryCreate(
+        start_year=439, title="Ancestral service", summary="User-entered history"
+    )
+    assert entry.start_year == 439
+
+
+def test_glory_history_requires_an_ancestor() -> None:
+    with pytest.raises(ValidationError):
+        FamilyHistoryCreate(
+            start_year=439, title="Ancestral service", summary="History", glory_amount=100
+        )
+
+
+def test_marriage_requires_distinct_spouses() -> None:
+    character_id = uuid4()
+    with pytest.raises(ValidationError):
+        MarriageCreate(spouse_one_id=character_id, spouse_two_id=character_id, start_year=480)

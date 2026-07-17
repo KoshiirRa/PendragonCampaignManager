@@ -21,3 +21,10 @@ The character and estate slice additionally exposes:
 
 Historical timeline events and dice logs intentionally have no update or delete endpoints. Corrections are appended as superseding events.
 The same rule applies to character-value, Glory, tenure, and improvement ledgers.
+# Family and ancestral-history API
+
+Family endpoints live under `/api/v1/campaigns/{campaign_id}`. Create and list families, add memberships and parentage, record marriages, open inheritance cases, register heirs, and transfer manors through the corresponding nested resources.
+
+Ancestral entries use `POST /families/{family_id}/history`. The service creates the central event automatically and can also create a linked Glory ledger entry when `glory_amount` and `ancestor_character_id` are supplied. Use `GET /families/{family_id}/history?before_year=480` for the pre-480 timeline.
+
+Sources are campaign-owned records at `/source-references`; `source_locator` on each history entry can hold a page, table, section, URL, or other user-defined locator.

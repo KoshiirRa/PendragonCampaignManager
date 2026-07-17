@@ -11,6 +11,11 @@ def test_openapi_contains_foundation_routes() -> None:
     assert "/api/v1/campaigns/{campaign_id}/characters/{character_id}/glory" in paths
     assert "/api/v1/campaigns/{campaign_id}/locations" in paths
     assert "/api/v1/campaigns/{campaign_id}/manors" in paths
+    assert "/api/v1/campaigns/{campaign_id}/families" in paths
+    assert "/api/v1/campaigns/{campaign_id}/parentage" in paths
+    assert "/api/v1/campaigns/{campaign_id}/inheritance-cases" in paths
+    assert "/api/v1/campaigns/{campaign_id}/families/{family_id}/history" in paths
+    assert "/api/v1/campaigns/{campaign_id}/source-references" in paths
 
 
 def test_historical_records_have_no_mutation_routes() -> None:
@@ -25,3 +30,6 @@ def test_historical_ledgers_have_no_destructive_routes() -> None:
     glory = paths["/api/v1/campaigns/{campaign_id}/characters/{character_id}/glory"]
     assert "patch" not in glory
     assert "delete" not in glory
+    history = paths["/api/v1/campaigns/{campaign_id}/families/{family_id}/history"]
+    assert "patch" not in history
+    assert "delete" not in history

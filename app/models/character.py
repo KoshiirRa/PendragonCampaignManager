@@ -3,7 +3,7 @@ from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import Enum, ForeignKey, Integer, SmallInteger, Text, UniqueConstraint
+from sqlalchemy import Enum, ForeignKey, Integer, SmallInteger, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -82,7 +82,7 @@ class CharacterNote(UUIDPrimaryKeyMixin, Base):
     note_type: Mapped[str] = mapped_column(Text, default="general")
     title: Mapped[str | None] = mapped_column(Text)
     body: Mapped[str] = mapped_column(Text)
-    recorded_at: Mapped[datetime]
+    recorded_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class CharacterStatusLedger(UUIDPrimaryKeyMixin, Base):
@@ -104,7 +104,7 @@ class CharacterStatusLedger(UUIDPrimaryKeyMixin, Base):
     effective_year: Mapped[int] = mapped_column(SmallInteger)
     sequence: Mapped[int] = mapped_column(Integer, default=0)
     reason: Mapped[str | None] = mapped_column(Text)
-    recorded_at: Mapped[datetime]
+    recorded_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class TraitDefinition(UUIDPrimaryKeyMixin, Base):
@@ -135,7 +135,7 @@ class CharacterTraitLedger(UUIDPrimaryKeyMixin, Base):
     trait_value: Mapped[int] = mapped_column(SmallInteger)
     opposed_value: Mapped[int] = mapped_column(SmallInteger)
     reason: Mapped[str | None] = mapped_column(Text)
-    recorded_at: Mapped[datetime]
+    recorded_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class SkillDefinition(UUIDPrimaryKeyMixin, Base):
@@ -165,7 +165,7 @@ class CharacterSkillLedger(UUIDPrimaryKeyMixin, Base):
     sequence: Mapped[int] = mapped_column(Integer, default=0)
     value: Mapped[int] = mapped_column(SmallInteger)
     reason: Mapped[str | None] = mapped_column(Text)
-    recorded_at: Mapped[datetime]
+    recorded_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class CharacterPassion(UUIDPrimaryKeyMixin, Base):
@@ -211,7 +211,7 @@ class CharacterPassionLedger(UUIDPrimaryKeyMixin, Base):
     sequence: Mapped[int] = mapped_column(Integer, default=0)
     value: Mapped[int] = mapped_column(SmallInteger)
     reason: Mapped[str | None] = mapped_column(Text)
-    recorded_at: Mapped[datetime]
+    recorded_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class GloryLedger(UUIDPrimaryKeyMixin, Base):
@@ -235,4 +235,4 @@ class GloryLedger(UUIDPrimaryKeyMixin, Base):
             values_callable=lambda items: [x.value for x in items],
         )
     )
-    recorded_at: Mapped[datetime]
+    recorded_at: Mapped[datetime] = mapped_column(server_default=func.now())
