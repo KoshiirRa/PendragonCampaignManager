@@ -80,6 +80,11 @@ async def add_tenure(campaign_id: UUID, manor_id: UUID, data: ManorTenureCreate,
     return await service.add_tenure(db, campaign_id, manor_id, data)
 
 
+@router.get("/manors/{manor_id}/tenures", response_model=list[ManorTenureRead])
+async def list_tenures(campaign_id: UUID, manor_id: UUID, db: DB):
+    return await service.list_tenures(db, campaign_id, manor_id)
+
+
 @router.post(
     "/manors/{manor_id}/improvements",
     response_model=ManorImprovementRead,
@@ -87,6 +92,11 @@ async def add_tenure(campaign_id: UUID, manor_id: UUID, data: ManorTenureCreate,
 )
 async def add_improvement(campaign_id: UUID, manor_id: UUID, data: ManorImprovementCreate, db: DB):
     return await service.add_improvement(db, campaign_id, manor_id, data)
+
+
+@router.get("/manors/{manor_id}/improvements", response_model=list[ManorImprovementRead])
+async def list_improvements(campaign_id: UUID, manor_id: UUID, db: DB):
+    return await service.list_improvements(db, campaign_id, manor_id)
 
 
 @router.post(
@@ -102,6 +112,14 @@ async def add_improvement_entry(
     db: DB,
 ):
     return await service.add_improvement_entry(db, campaign_id, manor_id, improvement_id, data)
+
+
+@router.get(
+    "/manors/{manor_id}/improvements/{improvement_id}/ledger",
+    response_model=list[ManorImprovementLedgerRead],
+)
+async def list_improvement_ledger(campaign_id: UUID, manor_id: UUID, improvement_id: UUID, db: DB):
+    return await service.list_improvement_ledger(db, campaign_id, manor_id, improvement_id)
 
 
 @router.get("/manors/{manor_id}/annual-resolutions", response_model=list[ManorAnnualResolutionRead])
@@ -149,6 +167,11 @@ async def add_asset_entry(
     campaign_id: UUID, manor_id: UUID, asset_id: UUID, data: ManorAssetEntryCreate, db: DB
 ):
     return await service.add_asset_entry(db, campaign_id, manor_id, asset_id, data)
+
+
+@router.get("/manors/{manor_id}/assets/{asset_id}/ledger", response_model=list[ManorAssetEntryRead])
+async def list_asset_ledger(campaign_id: UUID, manor_id: UUID, asset_id: UUID, db: DB):
+    return await service.list_asset_ledger(db, campaign_id, manor_id, asset_id)
 
 
 @router.post(

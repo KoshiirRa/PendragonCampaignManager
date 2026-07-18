@@ -23,6 +23,13 @@ def test_openapi_contains_foundation_routes() -> None:
     assert "/api/v1/campaigns/{campaign_id}/manors/{manor_id}/annual-resolutions" in paths
     assert "/api/v1/campaigns/{campaign_id}/manors/{manor_id}/treasury" in paths
     assert "/api/v1/campaigns/{campaign_id}/manors/{manor_id}/household" in paths
+    assert "/api/v1/campaigns/{campaign_id}/manors/{manor_id}/tenures" in paths
+    assert "/api/v1/campaigns/{campaign_id}/manors/{manor_id}/improvements" in paths
+    assert (
+        "/api/v1/campaigns/{campaign_id}/manors/{manor_id}/improvements/{improvement_id}/ledger"
+        in paths
+    )
+    assert "/api/v1/campaigns/{campaign_id}/manors/{manor_id}/assets/{asset_id}/ledger" in paths
 
 
 def test_historical_records_have_no_mutation_routes() -> None:

@@ -174,6 +174,17 @@ async def add_tenure(
     )
 
 
+async def list_tenures(db, campaign_id, manor_id):
+    await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    return list(
+        await db.scalars(
+            select(ManorTenure)
+            .where(ManorTenure.manor_id == manor_id)
+            .order_by(ManorTenure.start_year, ManorTenure.created_at)
+        )
+    )
+
+
 async def create_annual_resolution(db, campaign_id, manor_id, data: ManorAnnualResolutionCreate):
     manor = await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
     if data.steward_character_id:
@@ -347,4 +358,45 @@ async def add_improvement_entry(
         ManorImprovementLedger(
             campaign_id=campaign_id, improvement_id=improvement_id, **data.model_dump()
         ),
+    )
+
+
+async def list_improvements(db, campaign_id, manor_id):
+    await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    return list(
+        await db.scalars(
+            select(ManorImprovement)
+            .where(ManorImprovement.manor_id == manor_id)
+            .order_by(ManorImprovement.improvement_type, ManorImprovement.name)
+        )
+    )
+
+
+async def list_improvement_ledger(db, campaign_id, manor_id, improvement_id):
+    await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    improvement = await _campaign_item(
+        db, ManorImprovement, improvement_id, campaign_id, "Improvement"
+    )
+    if improvement.manor_id != manor_id:
+        raise NotFoundError("Improvement not found")
+    return list(
+        await db.scalars(
+            select(ManorImprovementLedger)
+            .where(ManorImprovementLedger.improvement_id == improvement_id)
+            .order_by(ManorImprovementLedger.effective_year, ManorImprovementLedger.recorded_at)
+        )
+    )
+
+
+async def list_asset_ledger(db, campaign_id, manor_id, asset_id):
+    await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    asset = await _campaign_item(db, ManorAsset, asset_id, campaign_id, "Asset")
+    if asset.manor_id != manor_id:
+        raise NotFoundError("Asset not found")
+    return list(
+        await db.scalars(
+            select(ManorAssetLedger)
+            .where(ManorAssetLedger.asset_id == asset_id)
+            .order_by(ManorAssetLedger.effective_year, ManorAssetLedger.recorded_at)
+        )
     )
