@@ -1,3 +1,4 @@
+import logging
 from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
@@ -39,6 +40,8 @@ from app.schemas.character import (
 )
 from app.services.campaigns import get_campaign
 from app.services.errors import ConflictError, NotFoundError
+
+logger = logging.getLogger(__name__)
 
 
 async def _campaign_item[T](
@@ -495,9 +498,15 @@ async def sync_foundry_snapshot(
             item.event_id = event.id
             db.add(item)
     try:
+        await db.flush()
         await db.commit()
     except IntegrityError as exc:
         await db.rollback()
+        logger.exception(
+            "Foundry snapshot integrity conflict for campaign=%s character=%s",
+            campaign_id,
+            character_id,
+        )
         raise ConflictError("Foundry snapshot conflicts with existing character data") from exc
     return FoundryCharacterSyncResult(
         character_id=character_id,
