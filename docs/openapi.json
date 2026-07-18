@@ -5588,6 +5588,11 @@
             "title": "Relatives Created",
             "default": 0
           },
+          "relative_details_updated": {
+            "type": "integer",
+            "title": "Relative Details Updated",
+            "default": 0
+          },
           "family_links_created": {
             "type": "integer",
             "title": "Family Links Created",
@@ -6027,6 +6032,17 @@
               }
             ],
             "title": "Description"
+          },
+          "gm_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gm Description"
           }
         },
         "type": "object",

@@ -290,6 +290,7 @@ class FoundryRelativeSnapshot(ORMModel):
     blessed_birth: bool = False
     barren_marriage: bool = False
     description: str | None = None
+    gm_description: str | None = None
 
     @model_validator(mode="after")
     def valid_lifespan(self) -> "FoundryRelativeSnapshot":
@@ -345,6 +346,7 @@ class FoundryCharacterSyncResult(ORMModel):
     horse_entries_added: int = 0
     ownership_changes: int = 0
     relatives_created: int = 0
+    relative_details_updated: int = 0
     family_links_created: int = 0
     relationships_created: int = 0
     inheritance_records_created: int = 0

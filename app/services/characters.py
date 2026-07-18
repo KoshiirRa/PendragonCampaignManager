@@ -701,6 +701,7 @@ async def sync_foundry_snapshot(
                 ownership_changes += 1
 
     relatives_created = 0
+    relative_details_updated = 0
     family_links_created = 0
     relationships_created = 0
     inheritance_records_created = 0
@@ -797,6 +798,7 @@ async def sync_foundry_snapshot(
                     gender=snapshot.gender,
                     birth_year=snapshot.birth_year,
                     status="dead" if snapshot.death_year else "alive",
+                    public_description=snapshot.description,
                     foundry_uuid=snapshot.source_key,
                     metadata_={
                         "source": "foundry_family_item",
@@ -819,10 +821,21 @@ async def sync_foundry_snapshot(
                     )
                 )
             else:
+                details_changed = False
                 if relative.birth_year is None and snapshot.birth_year:
                     relative.birth_year = snapshot.birth_year
+                    details_changed = True
                 if relative.gender is None and snapshot.gender:
                     relative.gender = snapshot.gender
+                    details_changed = True
+                if (
+                    snapshot.description is not None
+                    and relative.public_description != snapshot.description
+                ):
+                    relative.public_description = snapshot.description
+                    details_changed = True
+                if details_changed:
+                    relative_details_updated += 1
                 if snapshot.death_year and relative.status != CharacterStatus.DEAD:
                     relative.status = CharacterStatus.DEAD
                     pending.append(
@@ -936,6 +949,15 @@ async def sync_foundry_snapshot(
                 )
             ).all()
         )
+        existing_gm_notes = {
+            (note.character_id, note.body)
+            for note in await db.scalars(
+                select(CharacterNote).where(
+                    CharacterNote.character_id.in_(relative_ids),
+                    CharacterNote.note_type == "foundry_family_gm_info",
+                )
+            )
+        }
         for snapshot in data.relatives:
             relative = relative_by_source[snapshot.source_key]
             adjustment = snapshot.glory_total - int(relative_glory.get(relative.id, 0))
@@ -951,10 +973,29 @@ async def sync_foundry_snapshot(
                         scope=KnowledgeScope.PLAYERS,
                     )
                 )
+            if (
+                snapshot.gm_description
+                and (
+                    relative.id,
+                    snapshot.gm_description,
+                )
+                not in existing_gm_notes
+            ):
+                pending.append(
+                    CharacterNote(
+                        campaign_id=campaign_id,
+                        character_id=relative.id,
+                        scope=KnowledgeScope.GM_ONLY,
+                        note_type="foundry_family_gm_info",
+                        title="Foundry family GM Info",
+                        body=snapshot.gm_description,
+                    )
+                )
 
     event = None
     family_changed = bool(
         relatives_created
+        or relative_details_updated
         or family_links_created
         or relationships_created
         or inheritance_records_created
@@ -1014,6 +1055,7 @@ async def sync_foundry_snapshot(
         horse_entries_added=horse_added,
         ownership_changes=ownership_changes,
         relatives_created=relatives_created,
+        relative_details_updated=relative_details_updated,
         family_links_created=family_links_created,
         relationships_created=relationships_created,
         inheritance_records_created=inheritance_records_created,

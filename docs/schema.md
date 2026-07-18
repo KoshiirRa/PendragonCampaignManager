@@ -81,6 +81,8 @@ Families are stable campaign entities, while membership, parentage, and marriage
 
 Foundry family synchronization stores external source keys on memberships, parentage, marriages, inheritance cases, and heirs. Embedded Pendragon family Items are promoted to ordinary NPC character identities, so later events and family trees reference the same people. The family name is supplied explicitly by the GM because Pendragon's `system.family` field is a family characteristic rather than a reliable surname.
 
+The family Item Description becomes the relative character's public description. GM Info is preserved separately as an append-only `gm_only` character note, preventing private material from leaking through player-visible character fields.
+
 Inheritance is represented as a case with candidate heirs and explicit asset transfers. Recording an inherited manor closes its current tenure and opens the beneficiary's tenure in the same database transaction, linked to the transfer event.
 
 `family_history_entries` supports year-by-year ancestral histories before or after 480. Every entry creates a central event and may link an ancestor, realm, source citation, dice log, and Glory ledger entry. Source title, edition, locator, summary, roll results, and arbitrary metadata are user-entered fields. The application contains no sourcebook prose or built-in sourcebook tables.

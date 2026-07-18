@@ -124,3 +124,15 @@ def test_inheritance_requires_heir_and_deceased_parent() -> None:
     assert _inheritance_case_key(living_parent, True) is None
     assert _inheritance_case_key(deceased_parent, False) is None
     assert _inheritance_case_key(deceased_parent, True) == "Actor.test.Item.parent:inheritance"
+
+
+def test_foundry_relative_accepts_public_and_gm_descriptions() -> None:
+    relative = FoundryRelativeSnapshot(
+        source_key="Actor.test.Item.spouse",
+        name="Lady Adwen",
+        relation="spouse",
+        description="Known at court.",
+        gm_description="Secret allegiance.",
+    )
+    assert relative.description == "Known at court."
+    assert relative.gm_description == "Secret allegiance."

@@ -46,6 +46,8 @@ Family endpoints live under `/api/v1/campaigns/{campaign_id}`. Create and list f
 
 The Foundry snapshot endpoint also accepts `family_name`, `relatives`, and `is_heir`. Relative Item UUIDs become durable NPC identities. Repeated snapshots reuse those identities and do not duplicate memberships, parentage, marriages, or inheritance claims. A marriage without a year in Foundry begins at the first synchronized campaign year. An inheritance case is inferred only when the knight is marked as heir and a parent has a death year.
 
+Relative `description` is synchronized to the NPC's public description. Relative `gm_description` is appended as a `gm_only` character note when its content changes; identical repeated snapshots do not duplicate the note.
+
 Ancestral entries use `POST /families/{family_id}/history`. The service creates the central event automatically and can also create a linked Glory ledger entry when `glory_amount` and `ancestor_character_id` are supplied. Use `GET /families/{family_id}/history?before_year=480` for the pre-480 timeline.
 
 Sources are campaign-owned records at `/source-references`; `source_locator` on each history entry can hold a page, table, section, URL, or other user-defined locator.
