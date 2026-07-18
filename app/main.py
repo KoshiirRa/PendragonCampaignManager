@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.errors import install_error_handlers
+from app.api.errors import UnhandledErrorMiddleware, install_error_handlers
 from app.api.routes import (
     campaigns_router,
     characters_router,
@@ -35,6 +35,7 @@ app = FastAPI(
     generate_unique_id_function=lambda route: route.name,
 )
 app.add_middleware(APIKeyMiddleware, api_key=settings.api_key)
+app.add_middleware(UnhandledErrorMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,

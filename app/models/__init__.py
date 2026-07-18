@@ -15,7 +15,7 @@ from app.models.character import (
     SkillDefinition,
     TraitDefinition,
 )
-from app.models.event import DiceLog, Event, EventLink
+from app.models.event import DiceLog, Event, EventLink, EventVisibility
 from app.models.family import (
     CharacterParentage,
     Family,
@@ -53,6 +53,7 @@ __all__ = [
     "DiceLog",
     "Event",
     "EventLink",
+    "EventVisibility",
     "Family",
     "FamilyHistoryEntry",
     "FamilyMembership",

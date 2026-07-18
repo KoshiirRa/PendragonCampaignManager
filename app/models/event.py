@@ -1,12 +1,19 @@
 from datetime import datetime
+from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, Integer, SmallInteger, String, Text, func
+from sqlalchemy import Enum, ForeignKey, Integer, SmallInteger, String, Text, func
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, UUIDPrimaryKeyMixin
+
+
+class EventVisibility(StrEnum):
+    GM_ONLY = "gm_only"
+    PLAYERS = "players"
+    PUBLIC = "public"
 
 
 class Event(UUIDPrimaryKeyMixin, Base):
@@ -22,7 +29,14 @@ class Event(UUIDPrimaryKeyMixin, Base):
     in_game_year: Mapped[int] = mapped_column(SmallInteger)
     in_game_date: Mapped[str | None] = mapped_column(String)
     sequence: Mapped[int] = mapped_column(Integer, default=0)
-    visibility: Mapped[str] = mapped_column(String, default="players")
+    visibility: Mapped[EventVisibility] = mapped_column(
+        Enum(
+            EventVisibility,
+            name="event_visibility",
+            values_callable=lambda items: [item.value for item in items],
+        ),
+        default=EventVisibility.PLAYERS,
+    )
     occurred_at: Mapped[datetime | None]
     recorded_at: Mapped[datetime] = mapped_column(server_default=func.now())
     supersedes_event_id: Mapped[UUID | None] = mapped_column(

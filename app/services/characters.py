@@ -16,6 +16,7 @@ from app.models import (
     CharacterTraitLedger,
     Event,
     EventLink,
+    EventVisibility,
     GloryLedger,
     KnowledgeScope,
     SkillDefinition,
@@ -485,7 +486,7 @@ async def sync_foundry_snapshot(
                 f"{passion_added} passion, and Glory {glory_adjustment:+d} changes."
             ),
             in_game_year=data.effective_year,
-            visibility="players",
+            visibility=EventVisibility.PLAYERS,
             metadata_={"source": "foundry_vtt", "foundry_uuid": character.foundry_uuid},
         )
         db.add(event)
