@@ -26,6 +26,15 @@ async def get_campaign(db: AsyncSession, campaign_id: UUID) -> Campaign:
     return campaign
 
 
+async def get_campaign_by_slug(db: AsyncSession, slug: str) -> Campaign:
+    campaign = await db.scalar(
+        select(Campaign).where(Campaign.slug == slug, Campaign.archived_at.is_(None))
+    )
+    if campaign is None:
+        raise NotFoundError("Campaign not found")
+    return campaign
+
+
 async def create_campaign(db: AsyncSession, data: CampaignCreate) -> Campaign:
     campaign = Campaign(
         **data.model_dump(by_alias=False, exclude={"metadata"}), metadata_=data.metadata

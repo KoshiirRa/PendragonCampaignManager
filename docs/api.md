@@ -67,3 +67,14 @@ The Foundry character snapshot accepts a complete `squires` collection. Each sta
 Ancestral entries use `POST /families/{family_id}/history`. The service creates the central event automatically and can also create a linked Glory ledger entry when `glory_amount` and `ancestor_character_id` are supplied. Use `GET /families/{family_id}/history?before_year=480` for the pre-480 timeline.
 
 Sources are campaign-owned records at `/source-references`; `source_locator` on each history entry can hold a page, table, section, URL, or other user-defined locator.
+# Player-facing projection
+
+`GET /api/v1/campaigns/{campaign_id}/player-view` returns the campaign year,
+player-visible chronicle events, families and memberships, and manors with their
+current holders, improvements, special features, and defenses. GM-only records
+are excluded. The endpoint still requires the API key and is intended to be
+called by a trusted server-side frontend proxy, never directly from browser code.
+
+`GET /api/v1/campaigns/by-slug/{slug}/player-view` provides the same projection for
+hostname-based campaign routing. Campaign slugs are unique and become the first
+label beneath the configured chronicle domain.

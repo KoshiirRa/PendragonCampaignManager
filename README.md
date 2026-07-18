@@ -30,4 +30,12 @@ uvicorn app.main:app --reload
 
 See the [player guide](docs/player-guide.md), [schema documentation](docs/schema.md), the [ER diagram](docs/er-diagram.md), [API notes](docs/api.md), the [Custom GPT setup guide](docs/custom-gpt-setup.md), the [ChatGPT Actions guide](docs/chatgpt-actions.md), the [versioned OpenAPI schema](docs/openapi.json), the [Supabase workflow](docs/supabase.md), and the [development guide](docs/development.md).
 
+## Player chronicle prototype
+
+The [`frontend`](frontend/) directory contains the Cloudflare-hosted, read-only campaign chronicle.
+It selects campaigns from `*.pendragon-chronicle.dwarvenbard.com`, then loads player-safe data
+through a server-side proxy. Representative local content remains available only as a resilient
+design fallback, and the backend credential is never sent to browser code. Pushes to `main` that
+change the frontend trigger the production deployment workflow.
+
 For containerized hosting, secrets, migration jobs, and the deployment pipeline, see the [Google Cloud Run deployment guide](docs/cloud-run.md).
