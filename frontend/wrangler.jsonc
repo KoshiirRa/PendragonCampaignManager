@@ -1,0 +1,33 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pendragon-campaign-chronicle",
+  "main": "dist/server/index.js",
+  "compatibility_date": "2026-05-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "no_bundle": true,
+  "rules": [
+    {
+      "type": "ESModule",
+      "globs": ["**/*.js", "**/*.mjs"]
+    }
+  ],
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": "dist/client"
+  },
+  "routes": [
+    {
+      "pattern": "*.pendragon-chronicle.dwarvenbard.com/*",
+      "zone_name": "dwarvenbard.com"
+    }
+  ],
+  "vars": {
+    "PENDRAGON_API_URL": "https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app",
+    "PENDRAGON_CAMPAIGN_DOMAIN": "pendragon-chronicle.dwarvenbard.com",
+    "PENDRAGON_CAMPAIGN_ID": "9801b832-b357-426a-b284-a18a403aa60e"
+  },
+  "observability": {
+    "enabled": true
+  }
+}
