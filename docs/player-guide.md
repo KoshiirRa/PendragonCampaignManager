@@ -67,6 +67,8 @@ The Gamemaster can create and manage a linked knight's manor from the Actor head
 
 Players should provide the Gamemaster with the agreed results of rolls and choices. The database records those outcomes; it does not replace table rulings or automatically reproduce sourcebook procedures.
 
+Estate money is recorded in Librum, with 240 denarii to one Librum. Currency labels do not refer to modern British pounds.
+
 ## Privacy
 
 Player-visible descriptions and campaign facts are kept separate from GM-only information. GM Info, private notes, secrets, and restricted source material are not intended to appear in player-facing responses.

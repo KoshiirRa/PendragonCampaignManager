@@ -89,6 +89,8 @@ The family Item Description becomes the relative character's public description.
 
 `winter_phases` represents one annual campaign phase per year, while `winter_phase_participants` links each synchronized character and its originating history entry. Births and child deaths continue through the effective family and character-status records rather than being duplicated here. `character_wound_ledger` appends a new state only when damage, treatment, source, or description changes.
 
+Economic decimal amounts are denominated in Librum. One Librum equals 240 denarii. The API uses decimal Librum values for manor income, expenses, treasury entries, wages, maintenance, construction, and related estate accounting; it does not represent these values as modern British pounds.
+
 ## Manor economics and households
 
 Manor identity and tenure remain in `manors` and `manor_tenures`. `manor_annual_resolutions` records the Stewardship outcome and resulting income, expense, privy-fund, famine, and population effects once per year. Every monetary change belongs in `manor_treasury_ledger`; balances are derived rather than stored.
