@@ -38,7 +38,7 @@ jobs:
           accountId: 5c214edff77bbcf4dee0445f5e204066
           workingDirectory: frontend
           command: deploy --config wrangler.production.jsonc
-          secrets: |
-            PENDRAGON_API_KEY
+      - name: Bind API key to deployed Worker
+        run: printf '%s' "$PENDRAGON_API_KEY" | npx wrangler secret put PENDRAGON_API_KEY --config wrangler.production.jsonc
         env:
           PENDRAGON_API_KEY: ${{ secrets.PENDRAGON_API_KEY }}
