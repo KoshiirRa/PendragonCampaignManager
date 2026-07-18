@@ -116,7 +116,7 @@ class TraitDefinition(UUIDPrimaryKeyMixin, Base):
     opposed_name: Mapped[str] = mapped_column(Text)
     description: Mapped[str | None] = mapped_column(Text)
     source_key: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime]
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class CharacterTraitLedger(UUIDPrimaryKeyMixin, Base):
@@ -148,7 +148,7 @@ class SkillDefinition(UUIDPrimaryKeyMixin, Base):
     category: Mapped[str] = mapped_column(Text, default="ordinary")
     description: Mapped[str | None] = mapped_column(Text)
     source_key: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime]
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class CharacterSkillLedger(UUIDPrimaryKeyMixin, Base):
@@ -196,7 +196,7 @@ class CharacterPassion(UUIDPrimaryKeyMixin, Base):
     )
     started_year: Mapped[int | None] = mapped_column(SmallInteger)
     ended_year: Mapped[int | None] = mapped_column(SmallInteger)
-    created_at: Mapped[datetime]
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class CharacterPassionLedger(UUIDPrimaryKeyMixin, Base):
