@@ -57,3 +57,28 @@ class CharacterWoundRead(ORMModel):
     description: str | None
     reason: str | None
     recorded_at: datetime
+
+
+class AnnualChronicleSectionRead(ORMModel):
+    id: UUID
+    character_id: UUID
+    position: int
+    heading: str
+    body: str
+    source_event_ids: list[UUID]
+
+
+class AnnualChronicleRead(ORMModel):
+    id: UUID
+    campaign_id: UUID
+    winter_phase_id: UUID
+    in_game_year: int
+    revision: int
+    title: str
+    opening: str
+    closing: str
+    status: str
+    generator_version: str
+    created_at: datetime
+    source_event_ids: list[UUID]
+    sections: list[AnnualChronicleSectionRead]

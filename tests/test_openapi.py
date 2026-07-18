@@ -28,6 +28,8 @@ def test_openapi_contains_foundation_routes() -> None:
     assert "/api/v1/campaigns/{campaign_id}/characters/{character_id}/squire-services" in paths
     assert "/api/v1/campaigns/{campaign_id}/squires/{squire_id}/states" in paths
     assert "/api/v1/campaigns/{campaign_id}/squires" in paths
+    assert "/api/v1/campaigns/{campaign_id}/years/{year}/chronicle" in paths
+    assert "/api/v1/campaigns/{campaign_id}/years/{year}/chronicle/generate" in paths
     assert "/api/v1/campaigns/{campaign_id}/manors/{manor_id}/tenures" in paths
     assert "/api/v1/campaigns/{campaign_id}/manors/{manor_id}/improvements" in paths
     assert (

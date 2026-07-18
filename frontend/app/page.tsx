@@ -21,7 +21,21 @@ type ApiCampaign = {
   events: Array<{ id: string; year: number; date?: string | null; event_type: string; title: string; description?: string | null }>;
   families: Array<{ id: string; name: string; origin_location?: string | null; motto?: string | null; culture?: string | null; notes?: string | null; members: ApiItem[] }>;
   manors: Array<{ id: string; name: string; holder?: string | null; customary_income?: string | null; population?: number | null; description?: string | null; improvements: ApiItem[]; special_features: ApiItem[]; defenses: ApiItem[] }>;
+  chronicles: Array<{ id: string; year: number; revision: number; title: string; opening: string; closing: string; sections: Array<{ character_id: string; heading: string; body: string }> }>;
 };
+
+type AnnualChronicle = ApiCampaign["chronicles"][number];
+
+const demoChronicles: AnnualChronicle[] = [{
+  id: "chronicle-485", year: 485, revision: 1,
+  title: "The Chronicle of the Year 485",
+  opening: "Here is set down the memory of the year 485, that worthy deeds, hard choices, and the turns of fortune should not be lost.",
+  closing: "Thus the year was brought to its winter reckoning, and each knight returned to hall and hearth bearing the honor and burden of what had passed.",
+  sections: [
+    { character_id: "cadry", heading: "Of Sir Cadry", body: "In the rain-swollen Avon valley, Sir Cadry held the crossing while the company recovered the stolen herd. Thereafter a marriage was spoken of between two houses, and the matter was carried onward to the harvest court." },
+    { character_id: "elad", heading: "Of Sir Elad", body: "Sir Elad rode with the company against the raiders and returned beneath the recovered banner, his service witnessed by the household of Salisbury." },
+  ],
+}];
 
 const demoEvents: ChronicleEvent[] = [
   {
@@ -127,6 +141,7 @@ export default function Home() {
   const [events, setEvents] = useState(demoEvents);
   const [families, setFamilies] = useState(demoFamilies);
   const [manors, setManors] = useState(demoManors);
+  const [chronicles, setChronicles] = useState(demoChronicles);
   const [year, setYear] = useState(485);
   const [filter, setFilter] = useState<(typeof filters)[number]>("All");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -182,6 +197,7 @@ export default function Home() {
         if (liveEvents.length) setEvents(liveEvents);
         if (liveFamilies.length) { setFamilies(liveFamilies); setSelectedFamily(liveFamilies[0]); }
         if (liveManors.length) { setManors(liveManors); setSelectedManor(liveManors[0]); }
+        if (data.chronicles?.length) setChronicles(data.chronicles);
         if (data.current_year) setYear(data.current_year);
       })
       .catch(() => undefined);
@@ -191,6 +207,7 @@ export default function Home() {
     () => events.filter((event) => event.year === year && (filter === "All" || event.type === filter)),
     [events, filter, year],
   );
+  const annualChronicle = chronicles.find((chronicle) => chronicle.year === year);
 
   return (
     <main>
@@ -241,6 +258,25 @@ export default function Home() {
             <button onClick={() => setYear(486)} disabled={year === 486} aria-label="Next year">→</button>
           </div>
         </div>
+
+        {annualChronicle && (
+          <article className="annual-chronicle" aria-labelledby={`annual-chronicle-${annualChronicle.year}`}>
+            <header>
+              <span>Winter chronicle · revision {annualChronicle.revision}</span>
+              <h3 id={`annual-chronicle-${annualChronicle.year}`}>{annualChronicle.title}</h3>
+              <p>{annualChronicle.opening}</p>
+            </header>
+            <div className="annual-chronicle-sections">
+              {annualChronicle.sections.map((section) => (
+                <section key={section.character_id}>
+                  <h4>{section.heading}</h4>
+                  <p>{section.body}</p>
+                </section>
+              ))}
+            </div>
+            <footer>{annualChronicle.closing}</footer>
+          </article>
+        )}
 
         <div className="filter-row" aria-label="Filter chronicle events">
           {filters.map((item) => <button key={item} className={filter === item ? "selected" : ""} onClick={() => setFilter(item)}>{item}</button>)}

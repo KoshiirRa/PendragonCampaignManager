@@ -59,6 +59,22 @@ class PlayerManor(ORMModel):
     defenses: list[PlayerManorDefense]
 
 
+class PlayerChronicleSection(ORMModel):
+    character_id: UUID
+    heading: str
+    body: str
+
+
+class PlayerChronicle(ORMModel):
+    id: UUID
+    year: int
+    revision: int
+    title: str
+    opening: str
+    closing: str
+    sections: list[PlayerChronicleSection]
+
+
 class CampaignPlayerView(ORMModel):
     campaign_id: UUID
     campaign_name: str
@@ -66,3 +82,4 @@ class CampaignPlayerView(ORMModel):
     events: list[PlayerEvent]
     families: list[PlayerFamily]
     manors: list[PlayerManor]
+    chronicles: list[PlayerChronicle]

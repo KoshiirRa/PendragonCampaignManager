@@ -4,6 +4,7 @@ from fastapi import APIRouter, status
 
 from app.api.dependencies import DB
 from app.schemas.winter import (
+    AnnualChronicleRead,
     CharacterHistoryRead,
     CharacterWoundRead,
     WinterParticipantRead,
@@ -23,6 +24,20 @@ async def list_winter_phases(campaign_id: UUID, db: DB):
 @router.post("/winter-phases", response_model=WinterPhaseRead, status_code=status.HTTP_201_CREATED)
 async def create_winter_phase(campaign_id: UUID, data: WinterPhaseCreate, db: DB):
     return await service.create_phase(db, campaign_id, data)
+
+
+@router.get("/years/{year}/chronicle", response_model=AnnualChronicleRead)
+async def get_annual_chronicle(campaign_id: UUID, year: int, db: DB):
+    return await service.get_chronicle(db, campaign_id, year)
+
+
+@router.post(
+    "/years/{year}/chronicle/generate",
+    response_model=AnnualChronicleRead,
+    status_code=status.HTTP_201_CREATED,
+)
+async def generate_annual_chronicle(campaign_id: UUID, year: int, db: DB):
+    return await service.generate_chronicle(db, campaign_id, year)
 
 
 @router.get("/winter-phases/{phase_id}/participants", response_model=list[WinterParticipantRead])

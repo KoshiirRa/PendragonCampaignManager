@@ -20,6 +20,7 @@ The current API exposes:
 - families, parentage, marriage, inheritance, and ancestral history;
 - Winter Phases, character history, wounds, and squire service;
 - a player-safe campaign projection by campaign ID or unique campaign slug.
+- automatically generated, revisioned annual chronicles for each Winter Phase.
 
 Historical timeline events and dice logs intentionally have no update or delete endpoints. Corrections are appended as superseding events.
 The same rule applies to character-value, Glory, tenure, and improvement ledgers.
@@ -73,10 +74,23 @@ The Foundry character snapshot accepts a complete `squires` collection. Each sta
 
 `GET /api/v1/campaigns/{campaign_id}/player-view` returns the campaign year,
 player-visible chronicle events, families and memberships, and manors with their
-current holders, improvements, special features, and defenses. GM-only records
+current holders, improvements, special features, defenses, and the latest published
+annual chronicle for each year. GM-only records
 are excluded. The endpoint still requires the API key and is intended to be
 called by a trusted server-side frontend proxy, never directly from browser code.
 
 `GET /api/v1/campaigns/by-slug/{slug}/player-view` provides the same projection for
 hostname-based campaign routing. Campaign slugs are unique and become the first
 label beneath the configured chronicle domain.
+
+## Annual Chronicle API
+
+Creating a Winter Phase automatically creates a published annual chronicle from the year's
+non-superseded, player-visible events. Every unarchived player-knight receives a section. Event
+links determine which deeds belong in each knight's account; a knight without linked deeds is
+recorded without invented activity.
+
+Read the latest revision at `/api/v1/campaigns/{campaign_id}/years/{year}/chronicle` or append a
+new generated revision with `POST /api/v1/campaigns/{campaign_id}/years/{year}/chronicle/generate`.
+Chronicle revisions and their source-event associations are historical records and have no update
+or delete endpoints.

@@ -56,6 +56,9 @@ from app.models.possession import (
 )
 from app.models.squire import Squire, SquireServiceHistory, SquireStateLedger
 from app.models.winter import (
+    AnnualChronicle,
+    AnnualChronicleSection,
+    AnnualChronicleSource,
     CharacterHistoryEntry,
     CharacterWoundLedger,
     WinterPhase,
@@ -108,6 +111,9 @@ __all__ = [
     "InventoryItem",
     "WeaponProfile",
     "CharacterHistoryEntry",
+    "AnnualChronicle",
+    "AnnualChronicleSection",
+    "AnnualChronicleSource",
     "CharacterWoundLedger",
     "WinterPhase",
     "WinterPhaseParticipant",

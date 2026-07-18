@@ -1037,6 +1037,7 @@ async def sync_foundry_snapshot(
 
     history_entries_created = 0
     winter_records_created = 0
+    chronicle_years: set[int] = set()
     if data.history is not None:
         existing_history_keys = set(
             await db.scalars(
@@ -1117,6 +1118,7 @@ async def sync_foundry_snapshot(
             history_entries_created += 1
 
             if is_winter:
+                chronicle_years.add(snapshot.year)
                 phase = phases.get(snapshot.year)
                 if phase is None:
                     phase_event = Event(
@@ -1368,6 +1370,12 @@ async def sync_foundry_snapshot(
             if hasattr(item, "event_id"):
                 item.event_id = event.id
             db.add(item)
+    if chronicle_years:
+        from app.services.winter import _generate_chronicle
+
+        for chronicle_year in sorted(chronicle_years):
+            await _generate_chronicle(db, campaign_id, phases[chronicle_year])
+
     try:
         await db.flush()
         await db.commit()

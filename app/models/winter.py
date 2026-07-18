@@ -66,3 +66,52 @@ class CharacterWoundLedger(UUIDPrimaryKeyMixin, Base):
     description: Mapped[str | None] = mapped_column(Text)
     reason: Mapped[str | None] = mapped_column(Text)
     recorded_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+
+class AnnualChronicle(UUIDPrimaryKeyMixin, Base):
+    __tablename__ = "annual_chronicles"
+    __table_args__ = (UniqueConstraint("campaign_id", "in_game_year", "revision"),)
+
+    campaign_id: Mapped[UUID] = mapped_column(ForeignKey("campaigns.id", ondelete="RESTRICT"))
+    winter_phase_id: Mapped[UUID] = mapped_column(
+        ForeignKey("winter_phases.id", ondelete="RESTRICT")
+    )
+    in_game_year: Mapped[int] = mapped_column(SmallInteger)
+    revision: Mapped[int] = mapped_column(Integer)
+    title: Mapped[str] = mapped_column(Text)
+    opening: Mapped[str] = mapped_column(Text)
+    closing: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(Text, default="published")
+    generator_version: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+
+class AnnualChronicleSection(UUIDPrimaryKeyMixin, Base):
+    __tablename__ = "annual_chronicle_sections"
+    __table_args__ = (
+        UniqueConstraint("chronicle_id", "character_id"),
+        UniqueConstraint("chronicle_id", "position"),
+    )
+
+    campaign_id: Mapped[UUID] = mapped_column(ForeignKey("campaigns.id", ondelete="RESTRICT"))
+    chronicle_id: Mapped[UUID] = mapped_column(
+        ForeignKey("annual_chronicles.id", ondelete="RESTRICT")
+    )
+    character_id: Mapped[UUID] = mapped_column(ForeignKey("characters.id", ondelete="RESTRICT"))
+    position: Mapped[int] = mapped_column(Integer)
+    heading: Mapped[str] = mapped_column(Text)
+    body: Mapped[str] = mapped_column(Text)
+
+
+class AnnualChronicleSource(UUIDPrimaryKeyMixin, Base):
+    __tablename__ = "annual_chronicle_sources"
+    __table_args__ = (UniqueConstraint("chronicle_id", "section_id", "event_id"),)
+
+    campaign_id: Mapped[UUID] = mapped_column(ForeignKey("campaigns.id", ondelete="RESTRICT"))
+    chronicle_id: Mapped[UUID] = mapped_column(
+        ForeignKey("annual_chronicles.id", ondelete="RESTRICT")
+    )
+    section_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("annual_chronicle_sections.id", ondelete="RESTRICT")
+    )
+    event_id: Mapped[UUID] = mapped_column(ForeignKey("events.id", ondelete="RESTRICT"))

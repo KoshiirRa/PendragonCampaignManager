@@ -1,9 +1,11 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import (
+    AnnualChronicle,
+    AnnualChronicleSection,
     Character,
     Event,
     EventVisibility,
@@ -20,6 +22,8 @@ from app.models import (
 )
 from app.schemas.player_view import (
     CampaignPlayerView,
+    PlayerChronicle,
+    PlayerChronicleSection,
     PlayerEvent,
     PlayerFamily,
     PlayerFamilyMember,
@@ -168,6 +172,58 @@ async def get_player_view(db: AsyncSession, campaign_id: UUID) -> CampaignPlayer
             )
         )
 
+    latest_revisions = (
+        select(
+            AnnualChronicle.in_game_year.label("year"),
+            func.max(AnnualChronicle.revision).label("revision"),
+        )
+        .where(
+            AnnualChronicle.campaign_id == campaign_id,
+            AnnualChronicle.status == "published",
+        )
+        .group_by(AnnualChronicle.in_game_year)
+        .subquery()
+    )
+    chronicles = list(
+        await db.scalars(
+            select(AnnualChronicle)
+            .join(
+                latest_revisions,
+                (AnnualChronicle.in_game_year == latest_revisions.c.year)
+                & (AnnualChronicle.revision == latest_revisions.c.revision),
+            )
+            .where(AnnualChronicle.campaign_id == campaign_id)
+            .order_by(AnnualChronicle.in_game_year)
+        )
+    )
+    chronicle_rows = []
+    for chronicle in chronicles:
+        sections = list(
+            await db.scalars(
+                select(AnnualChronicleSection)
+                .where(AnnualChronicleSection.chronicle_id == chronicle.id)
+                .order_by(AnnualChronicleSection.position)
+            )
+        )
+        chronicle_rows.append(
+            PlayerChronicle(
+                id=chronicle.id,
+                year=chronicle.in_game_year,
+                revision=chronicle.revision,
+                title=chronicle.title,
+                opening=chronicle.opening,
+                closing=chronicle.closing,
+                sections=[
+                    PlayerChronicleSection(
+                        character_id=section.character_id,
+                        heading=section.heading,
+                        body=section.body,
+                    )
+                    for section in sections
+                ],
+            )
+        )
+
     return CampaignPlayerView(
         campaign_id=campaign.id,
         campaign_name=campaign.name,
@@ -185,6 +241,7 @@ async def get_player_view(db: AsyncSession, campaign_id: UUID) -> CampaignPlayer
         ],
         families=family_rows,
         manors=manor_rows,
+        chronicles=chronicle_rows,
     )
 
 

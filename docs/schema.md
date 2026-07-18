@@ -116,6 +116,14 @@ Every synchronized squire is both a normal NPC `character` and a stable `squires
 | `squires` | Stable squire identity linked to an NPC character |
 | `squire_service_history` | Effective-dated service to a knight |
 | `squire_state_ledger` | Append-only squire development state |
+| `annual_chronicles` | Immutable, revisioned Winter Phase narratives |
+| `annual_chronicle_sections` | One generated account per player-knight and revision |
+| `annual_chronicle_sources` | Event provenance for chronicles and knight sections |
+
+Annual chronicles are generated when Winter Phase is recorded. Generation reads only
+non-superseded player-visible events and groups deeds through character `event_links`. Each run
+appends a revision; it never replaces earlier prose. Source rows retain the factual basis of every
+section, and the player projection returns only the latest published revision for each year.
 
 Inheritance is represented as a case with candidate heirs and explicit asset transfers. Recording an inherited manor closes its current tenure and opens the beneficiary's tenure in the same database transaction, linked to the transfer event.
 

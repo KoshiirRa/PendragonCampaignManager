@@ -4235,6 +4235,110 @@
         }
       }
     },
+    "/api/v1/campaigns/{campaign_id}/years/{year}/chronicle": {
+      "get": {
+        "tags": [
+          "winter-phase"
+        ],
+        "summary": "Get Annual Chronicle",
+        "operationId": "get_annual_chronicle",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Campaign Id"
+            }
+          },
+          {
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Year"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnualChronicleRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaigns/{campaign_id}/years/{year}/chronicle/generate": {
+      "post": {
+        "tags": [
+          "winter-phase"
+        ],
+        "summary": "Generate Annual Chronicle",
+        "operationId": "generate_annual_chronicle",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Campaign Id"
+            }
+          },
+          {
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Year"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnualChronicleRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/campaigns/{campaign_id}/winter-phases/{phase_id}/participants": {
       "get": {
         "tags": [
@@ -4455,6 +4559,134 @@
   },
   "components": {
     "schemas": {
+      "AnnualChronicleRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "campaign_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campaign Id"
+          },
+          "winter_phase_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Winter Phase Id"
+          },
+          "in_game_year": {
+            "type": "integer",
+            "title": "In Game Year"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "opening": {
+            "type": "string",
+            "title": "Opening"
+          },
+          "closing": {
+            "type": "string",
+            "title": "Closing"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "generator_version": {
+            "type": "string",
+            "title": "Generator Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "source_event_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Source Event Ids"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/AnnualChronicleSectionRead"
+            },
+            "type": "array",
+            "title": "Sections"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "campaign_id",
+          "winter_phase_id",
+          "in_game_year",
+          "revision",
+          "title",
+          "opening",
+          "closing",
+          "status",
+          "generator_version",
+          "created_at",
+          "source_event_ids",
+          "sections"
+        ],
+        "title": "AnnualChronicleRead"
+      },
+      "AnnualChronicleSectionRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "character_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Character Id"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "heading": {
+            "type": "string",
+            "title": "Heading"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "source_event_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Source Event Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "character_id",
+          "position",
+          "heading",
+          "body",
+          "source_event_ids"
+        ],
+        "title": "AnnualChronicleSectionRead"
+      },
       "CampaignCreate": {
         "properties": {
           "name": {
@@ -4545,6 +4777,13 @@
             },
             "type": "array",
             "title": "Manors"
+          },
+          "chronicles": {
+            "items": {
+              "$ref": "#/components/schemas/PlayerChronicle"
+            },
+            "type": "array",
+            "title": "Chronicles"
           }
         },
         "type": "object",
@@ -4554,7 +4793,8 @@
           "current_year",
           "events",
           "families",
-          "manors"
+          "manors",
+          "chronicles"
         ],
         "title": "CampaignPlayerView"
       },
@@ -11336,6 +11576,77 @@
           "created_at"
         ],
         "title": "PassionRead"
+      },
+      "PlayerChronicle": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "year": {
+            "type": "integer",
+            "title": "Year"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "opening": {
+            "type": "string",
+            "title": "Opening"
+          },
+          "closing": {
+            "type": "string",
+            "title": "Closing"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/PlayerChronicleSection"
+            },
+            "type": "array",
+            "title": "Sections"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "year",
+          "revision",
+          "title",
+          "opening",
+          "closing",
+          "sections"
+        ],
+        "title": "PlayerChronicle"
+      },
+      "PlayerChronicleSection": {
+        "properties": {
+          "character_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Character Id"
+          },
+          "heading": {
+            "type": "string",
+            "title": "Heading"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "character_id",
+          "heading",
+          "body"
+        ],
+        "title": "PlayerChronicleSection"
       },
       "PlayerEvent": {
         "properties": {
