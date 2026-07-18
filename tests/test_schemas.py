@@ -11,7 +11,7 @@ from app.schemas.character import (
     GloryCreate,
 )
 from app.schemas.family import FamilyHistoryCreate, MarriageCreate
-from app.schemas.location import ManorCreate
+from app.schemas.location import ManorAnnualResolutionCreate, ManorCreate, TreasuryEntryCreate
 from app.services.characters import _inheritance_case_key
 
 
@@ -161,3 +161,12 @@ def test_foundry_snapshot_accepts_history_and_wounds() -> None:
     )
     assert snapshot.history[0].source == "winter"
     assert snapshot.wounds[0].treated is True
+
+
+def test_manor_resolution_and_treasury_validation() -> None:
+    resolution = ManorAnnualResolutionCreate(
+        in_game_year=485, roll_result="success", income=2, expenses=1, privy_funds=1
+    )
+    assert resolution.income - resolution.expenses == 1
+    with pytest.raises(ValidationError):
+        TreasuryEntryCreate(in_game_year=485, amount=0, category="income", description="None")

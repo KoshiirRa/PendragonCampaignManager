@@ -57,6 +57,9 @@ class LocationRead(LocationCreate):
 class ManorCreate(ORMModel):
     location: LocationCreate
     customary_income: Decimal | None = Field(default=None, ge=0)
+    assized_rent: Decimal | None = Field(default=None, ge=0)
+    population: int | None = Field(default=None, ge=0)
+    base_defensive_value: int = Field(default=1, ge=0)
     acreage: int | None = Field(default=None, ge=0)
     notes: str | None = None
 
@@ -72,6 +75,9 @@ class ManorRead(ORMModel):
     campaign_id: UUID
     location_id: UUID
     customary_income: Decimal | None
+    assized_rent: Decimal | None
+    population: int | None
+    base_defensive_value: int
     acreage: int | None
     notes: str | None
     created_at: datetime
@@ -123,3 +129,113 @@ class ManorImprovementLedgerRead(ManorImprovementLedgerCreate):
     campaign_id: UUID
     improvement_id: UUID
     recorded_at: datetime
+
+
+class ManorAnnualResolutionCreate(ORMModel):
+    winter_phase_id: UUID | None = None
+    in_game_year: int = Field(ge=1, le=9999)
+    steward_character_id: UUID | None = None
+    stewardship_value: int | None = Field(default=None, ge=0)
+    roll_result: str = Field(min_length=1, max_length=100)
+    income: Decimal = Decimal("0")
+    expenses: Decimal = Field(default=Decimal("0"), ge=0)
+    privy_funds: Decimal = Decimal("0")
+    famine_stage: int = Field(default=0, ge=0)
+    population_change: int = 0
+    notes: str | None = None
+
+
+class ManorAnnualResolutionRead(ManorAnnualResolutionCreate):
+    id: UUID
+    campaign_id: UUID
+    manor_id: UUID
+    event_id: UUID
+    created_at: datetime
+
+
+class TreasuryEntryCreate(ORMModel):
+    event_id: UUID | None = None
+    annual_resolution_id: UUID | None = None
+    in_game_year: int = Field(ge=1, le=9999)
+    amount: Decimal
+    category: str = Field(min_length=1, max_length=100)
+    description: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def amount_is_nonzero(self):
+        if self.amount == 0:
+            raise ValueError("amount must not be zero")
+        return self
+
+
+class TreasuryEntryRead(TreasuryEntryCreate):
+    id: UUID
+    campaign_id: UUID
+    manor_id: UUID
+    created_at: datetime
+
+
+class ManorAssetCreate(ORMModel):
+    asset_type: str = Field(min_length=1, max_length=100)
+    name: str = Field(min_length=1, max_length=200)
+    description: str | None = None
+
+
+class ManorAssetRead(ManorAssetCreate):
+    id: UUID
+    campaign_id: UUID
+    manor_id: UUID
+    created_at: datetime
+
+
+class ManorAssetEntryCreate(ORMModel):
+    event_id: UUID | None = None
+    effective_year: int = Field(ge=1, le=9999)
+    quantity: Decimal | None = Field(default=None, ge=0)
+    status: str = Field(min_length=1, max_length=100)
+    annual_income: Decimal = Decimal("0")
+    annual_cost: Decimal = Field(default=Decimal("0"), ge=0)
+    notes: str | None = None
+
+
+class ManorAssetEntryRead(ManorAssetEntryCreate):
+    id: UUID
+    campaign_id: UUID
+    asset_id: UUID
+    recorded_at: datetime
+
+
+class HouseholdEmploymentCreate(ORMModel):
+    character_id: UUID | None = None
+    name: str = Field(min_length=1, max_length=200)
+    role: str = Field(min_length=1, max_length=100)
+    social_rank: str | None = None
+    key_skill: str | None = None
+    key_skill_value: int | None = Field(default=None, ge=0)
+    annual_cost: Decimal = Field(default=Decimal("0"), ge=0)
+    start_year: int = Field(ge=1, le=9999)
+    end_year: int | None = Field(default=None, ge=1, le=9999)
+    notes: str | None = None
+
+
+class HouseholdEmploymentRead(HouseholdEmploymentCreate):
+    id: UUID
+    campaign_id: UUID
+    manor_id: UUID
+    start_event_id: UUID | None
+    end_event_id: UUID | None
+    created_at: datetime
+
+
+class DefenseLayerCreate(ORMModel):
+    name: str = Field(min_length=1, max_length=200)
+    ring_order: int = Field(ge=0)
+    defensive_value: int
+    construction_cost: Decimal | None = Field(default=None, ge=0)
+    improvement_id: UUID | None = None
+
+
+class DefenseLayerRead(DefenseLayerCreate):
+    id: UUID
+    campaign_id: UUID
+    manor_id: UUID

@@ -20,6 +20,9 @@ def test_openapi_contains_foundation_routes() -> None:
     assert "/api/v1/campaigns/{campaign_id}/winter-phases" in paths
     assert "/api/v1/campaigns/{campaign_id}/characters/{character_id}/history" in paths
     assert "/api/v1/campaigns/{campaign_id}/characters/{character_id}/wounds" in paths
+    assert "/api/v1/campaigns/{campaign_id}/manors/{manor_id}/annual-resolutions" in paths
+    assert "/api/v1/campaigns/{campaign_id}/manors/{manor_id}/treasury" in paths
+    assert "/api/v1/campaigns/{campaign_id}/manors/{manor_id}/household" in paths
 
 
 def test_historical_records_have_no_mutation_routes() -> None:

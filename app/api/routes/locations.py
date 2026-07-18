@@ -5,9 +5,19 @@ from fastapi import APIRouter, Query, status
 
 from app.api.dependencies import DB
 from app.schemas.location import (
+    DefenseLayerCreate,
+    DefenseLayerRead,
+    HouseholdEmploymentCreate,
+    HouseholdEmploymentRead,
     LocationCreate,
     LocationRead,
     LocationUpdate,
+    ManorAnnualResolutionCreate,
+    ManorAnnualResolutionRead,
+    ManorAssetCreate,
+    ManorAssetEntryCreate,
+    ManorAssetEntryRead,
+    ManorAssetRead,
     ManorCreate,
     ManorImprovementCreate,
     ManorImprovementLedgerCreate,
@@ -16,6 +26,8 @@ from app.schemas.location import (
     ManorRead,
     ManorTenureCreate,
     ManorTenureRead,
+    TreasuryEntryCreate,
+    TreasuryEntryRead,
 )
 from app.services import locations as service
 
@@ -90,3 +102,74 @@ async def add_improvement_entry(
     db: DB,
 ):
     return await service.add_improvement_entry(db, campaign_id, manor_id, improvement_id, data)
+
+
+@router.get("/manors/{manor_id}/annual-resolutions", response_model=list[ManorAnnualResolutionRead])
+async def list_annual_resolutions(campaign_id: UUID, manor_id: UUID, db: DB):
+    return await service.list_annual_resolutions(db, campaign_id, manor_id)
+
+
+@router.post(
+    "/manors/{manor_id}/annual-resolutions",
+    response_model=ManorAnnualResolutionRead,
+    status_code=201,
+)
+async def create_annual_resolution(
+    campaign_id: UUID, manor_id: UUID, data: ManorAnnualResolutionCreate, db: DB
+):
+    return await service.create_annual_resolution(db, campaign_id, manor_id, data)
+
+
+@router.get("/manors/{manor_id}/treasury", response_model=list[TreasuryEntryRead])
+async def list_treasury(campaign_id: UUID, manor_id: UUID, db: DB):
+    return await service.list_treasury(db, campaign_id, manor_id)
+
+
+@router.post("/manors/{manor_id}/treasury", response_model=TreasuryEntryRead, status_code=201)
+async def add_treasury_entry(campaign_id: UUID, manor_id: UUID, data: TreasuryEntryCreate, db: DB):
+    return await service.add_treasury_entry(db, campaign_id, manor_id, data)
+
+
+@router.post("/manors/{manor_id}/assets", response_model=ManorAssetRead, status_code=201)
+async def add_asset(campaign_id: UUID, manor_id: UUID, data: ManorAssetCreate, db: DB):
+    return await service.add_asset(db, campaign_id, manor_id, data)
+
+
+@router.get("/manors/{manor_id}/assets", response_model=list[ManorAssetRead])
+async def list_assets(campaign_id: UUID, manor_id: UUID, db: DB):
+    return await service.list_assets(db, campaign_id, manor_id)
+
+
+@router.post(
+    "/manors/{manor_id}/assets/{asset_id}/ledger",
+    response_model=ManorAssetEntryRead,
+    status_code=201,
+)
+async def add_asset_entry(
+    campaign_id: UUID, manor_id: UUID, asset_id: UUID, data: ManorAssetEntryCreate, db: DB
+):
+    return await service.add_asset_entry(db, campaign_id, manor_id, asset_id, data)
+
+
+@router.post(
+    "/manors/{manor_id}/household", response_model=HouseholdEmploymentRead, status_code=201
+)
+async def add_household_employment(
+    campaign_id: UUID, manor_id: UUID, data: HouseholdEmploymentCreate, db: DB
+):
+    return await service.add_employment(db, campaign_id, manor_id, data)
+
+
+@router.get("/manors/{manor_id}/household", response_model=list[HouseholdEmploymentRead])
+async def list_household_employment(campaign_id: UUID, manor_id: UUID, db: DB):
+    return await service.list_employment(db, campaign_id, manor_id)
+
+
+@router.post("/manors/{manor_id}/defenses", response_model=DefenseLayerRead, status_code=201)
+async def add_defense(campaign_id: UUID, manor_id: UUID, data: DefenseLayerCreate, db: DB):
+    return await service.add_defense(db, campaign_id, manor_id, data)
+
+
+@router.get("/manors/{manor_id}/defenses", response_model=list[DefenseLayerRead])
+async def list_defenses(campaign_id: UUID, manor_id: UUID, db: DB):
+    return await service.list_defenses(db, campaign_id, manor_id)

@@ -8,19 +8,34 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import (
     Character,
+    Event,
+    EventVisibility,
+    HouseholdEmployment,
     Location,
     Manor,
+    ManorAnnualResolution,
+    ManorAsset,
+    ManorAssetLedger,
+    ManorDefenseLayer,
     ManorImprovement,
     ManorImprovementLedger,
     ManorTenure,
+    ManorTreasuryEntry,
+    WinterPhase,
 )
 from app.schemas.location import (
+    DefenseLayerCreate,
+    HouseholdEmploymentCreate,
     LocationCreate,
     LocationUpdate,
+    ManorAnnualResolutionCreate,
+    ManorAssetCreate,
+    ManorAssetEntryCreate,
     ManorCreate,
     ManorImprovementCreate,
     ManorImprovementLedgerCreate,
     ManorTenureCreate,
+    TreasuryEntryCreate,
 )
 from app.services.campaigns import get_campaign
 from app.services.errors import ConflictError, NotFoundError
@@ -129,6 +144,9 @@ async def create_manor(db: AsyncSession, campaign_id: UUID, data: ManorCreate) -
         campaign_id=campaign_id,
         location_id=location.id,
         customary_income=data.customary_income,
+        assized_rent=data.assized_rent,
+        population=data.population,
+        base_defensive_value=data.base_defensive_value,
         acreage=data.acreage,
         notes=data.notes,
     )
@@ -153,6 +171,152 @@ async def add_tenure(
         db,
         ManorTenure(campaign_id=campaign_id, manor_id=manor_id, **data.model_dump()),
         "Manor already has a current holder",
+    )
+
+
+async def create_annual_resolution(db, campaign_id, manor_id, data: ManorAnnualResolutionCreate):
+    manor = await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    if data.steward_character_id:
+        await _campaign_item(db, Character, data.steward_character_id, campaign_id, "Steward")
+    if data.winter_phase_id:
+        await _campaign_item(db, WinterPhase, data.winter_phase_id, campaign_id, "Winter Phase")
+    event = Event(
+        campaign_id=campaign_id,
+        event_type="manor_annual_resolution",
+        title=f"Manor economic resolution {data.in_game_year}",
+        description=data.notes,
+        in_game_year=data.in_game_year,
+        visibility=EventVisibility.PLAYERS,
+        metadata_={"manor_id": str(manor.id)},
+    )
+    db.add(event)
+    await db.flush()
+    resolution = ManorAnnualResolution(
+        campaign_id=campaign_id, manor_id=manor_id, event_id=event.id, **data.model_dump()
+    )
+    db.add(resolution)
+    await db.flush()
+    net = data.income - data.expenses
+    if net:
+        db.add(
+            ManorTreasuryEntry(
+                campaign_id=campaign_id,
+                manor_id=manor_id,
+                event_id=event.id,
+                annual_resolution_id=resolution.id,
+                in_game_year=data.in_game_year,
+                amount=net,
+                category="annual_resolution",
+                description=f"Net manor result ({data.roll_result})",
+            )
+        )
+    if manor.population is not None and data.population_change:
+        manor.population = max(0, manor.population + data.population_change)
+    try:
+        await db.commit()
+    except IntegrityError as exc:
+        await db.rollback()
+        raise ConflictError("Manor already has an annual resolution for this year") from exc
+    await db.refresh(resolution)
+    return resolution
+
+
+async def list_annual_resolutions(db, campaign_id, manor_id):
+    await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    return list(
+        await db.scalars(
+            select(ManorAnnualResolution)
+            .where(ManorAnnualResolution.manor_id == manor_id)
+            .order_by(ManorAnnualResolution.in_game_year)
+        )
+    )
+
+
+async def add_treasury_entry(db, campaign_id, manor_id, data: TreasuryEntryCreate):
+    await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    if data.event_id:
+        await _campaign_item(db, Event, data.event_id, campaign_id, "Event")
+    return await _commit(
+        db, ManorTreasuryEntry(campaign_id=campaign_id, manor_id=manor_id, **data.model_dump())
+    )
+
+
+async def list_treasury(db, campaign_id, manor_id):
+    await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    return list(
+        await db.scalars(
+            select(ManorTreasuryEntry)
+            .where(ManorTreasuryEntry.manor_id == manor_id)
+            .order_by(ManorTreasuryEntry.in_game_year, ManorTreasuryEntry.created_at)
+        )
+    )
+
+
+async def add_asset(db, campaign_id, manor_id, data: ManorAssetCreate):
+    await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    return await _commit(
+        db, ManorAsset(campaign_id=campaign_id, manor_id=manor_id, **data.model_dump())
+    )
+
+
+async def add_asset_entry(db, campaign_id, manor_id, asset_id, data: ManorAssetEntryCreate):
+    await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    asset = await _campaign_item(db, ManorAsset, asset_id, campaign_id, "Asset")
+    if asset.manor_id != manor_id:
+        raise NotFoundError("Asset not found")
+    return await _commit(
+        db, ManorAssetLedger(campaign_id=campaign_id, asset_id=asset_id, **data.model_dump())
+    )
+
+
+async def add_employment(db, campaign_id, manor_id, data: HouseholdEmploymentCreate):
+    await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    if data.character_id:
+        await _campaign_item(db, Character, data.character_id, campaign_id, "Household character")
+    return await _commit(
+        db, HouseholdEmployment(campaign_id=campaign_id, manor_id=manor_id, **data.model_dump())
+    )
+
+
+async def add_defense(db, campaign_id, manor_id, data: DefenseLayerCreate):
+    await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    if data.improvement_id:
+        await _campaign_item(db, ManorImprovement, data.improvement_id, campaign_id, "Improvement")
+    return await _commit(
+        db, ManorDefenseLayer(campaign_id=campaign_id, manor_id=manor_id, **data.model_dump())
+    )
+
+
+async def list_assets(db, campaign_id, manor_id):
+    await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    return list(
+        await db.scalars(
+            select(ManorAsset)
+            .where(ManorAsset.manor_id == manor_id)
+            .order_by(ManorAsset.asset_type, ManorAsset.name)
+        )
+    )
+
+
+async def list_employment(db, campaign_id, manor_id):
+    await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    return list(
+        await db.scalars(
+            select(HouseholdEmployment)
+            .where(HouseholdEmployment.manor_id == manor_id)
+            .order_by(HouseholdEmployment.start_year, HouseholdEmployment.name)
+        )
+    )
+
+
+async def list_defenses(db, campaign_id, manor_id):
+    await _campaign_item(db, Manor, manor_id, campaign_id, "Manor")
+    return list(
+        await db.scalars(
+            select(ManorDefenseLayer)
+            .where(ManorDefenseLayer.manor_id == manor_id)
+            .order_by(ManorDefenseLayer.ring_order)
+        )
     )
 
 

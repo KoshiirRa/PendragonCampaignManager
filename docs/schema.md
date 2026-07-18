@@ -89,6 +89,12 @@ The family Item Description becomes the relative character's public description.
 
 `winter_phases` represents one annual campaign phase per year, while `winter_phase_participants` links each synchronized character and its originating history entry. Births and child deaths continue through the effective family and character-status records rather than being duplicated here. `character_wound_ledger` appends a new state only when damage, treatment, source, or description changes.
 
+## Manor economics and households
+
+Manor identity and tenure remain in `manors` and `manor_tenures`. `manor_annual_resolutions` records the Stewardship outcome and resulting income, expense, privy-fund, famine, and population effects once per year. Every monetary change belongs in `manor_treasury_ledger`; balances are derived rather than stored.
+
+`manor_assets` normalizes livestock, natural resources, investments, notable features, and other estate assets, while `manor_asset_ledger` preserves quantity, condition, income, and upkeep changes. Existing improvement ledgers retain construction and ruin/repair history. `household_employment_history` supports both a linked named Character and an anonymous professional with role, rank, Key Skill, annual cost, and effective dates. `manor_defense_layers` preserves ordered defensive rings instead of flattening slash-separated Defensive Values.
+
 Inheritance is represented as a case with candidate heirs and explicit asset transfers. Recording an inherited manor closes its current tenure and opens the beneficiary's tenure in the same database transaction, linked to the transfer event.
 
 `family_history_entries` supports year-by-year ancestral histories before or after 480. Every entry creates a central event and may link an ancestor, realm, source citation, dice log, and Glory ledger entry. Source title, edition, locator, summary, roll results, and arbitrary metadata are user-entered fields. The application contains no sourcebook prose or built-in sourcebook tables.

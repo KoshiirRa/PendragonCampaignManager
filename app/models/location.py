@@ -75,6 +75,9 @@ class Manor(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("locations.id", ondelete="RESTRICT"), unique=True
     )
     customary_income: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    assized_rent: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    population: Mapped[int | None] = mapped_column(Integer)
+    base_defensive_value: Mapped[int] = mapped_column(Integer, default=1)
     acreage: Mapped[int | None] = mapped_column(Integer)
     notes: Mapped[str | None] = mapped_column(Text)
 

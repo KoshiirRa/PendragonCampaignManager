@@ -54,6 +54,12 @@ List or create annual records at `/campaigns/{campaign_id}/winter-phases`; list 
 
 During Foundry synchronization each History Item becomes its own central Event and normalized history entry. Items whose source is `winter` create or reuse the campaign/year Winter Phase and attach the character as a participant. `reported_glory` preserves what the History Item displayed, but does not independently award Glory: snapshot total reconciliation remains authoritative and prevents double counting. History and GM Info use separate player-visible and GM-only records.
 
+# Manor economics and household API
+
+Create and list annual results at `/manors/{manor_id}/annual-resolutions`; creation automatically generates the central Event and a net treasury entry. Manual income, costs, construction payments, charity, ransoms, and other transactions use `/manors/{manor_id}/treasury`. Assets and their state histories use `/assets` and `/assets/{asset_id}/ledger`; household professionals use `/household`; ordered defensive structures use `/defenses`. Improvement construction and condition continue through the existing improvement ledger endpoints.
+
+The API stores user-entered outcomes and modifiers rather than copyrighted sourcebook lookup tables. Clients calculate or select the outcome, while the backend validates campaign boundaries and preserves the resulting history.
+
 Ancestral entries use `POST /families/{family_id}/history`. The service creates the central event automatically and can also create a linked Glory ledger entry when `glory_amount` and `ancestor_character_id` are supplied. Use `GET /families/{family_id}/history?before_year=480` for the pre-480 timeline.
 
 Sources are campaign-owned records at `/source-references`; `source_locator` on each history entry can hold a page, table, section, URL, or other user-defined locator.

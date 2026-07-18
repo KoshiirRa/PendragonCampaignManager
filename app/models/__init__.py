@@ -15,6 +15,14 @@ from app.models.character import (
     SkillDefinition,
     TraitDefinition,
 )
+from app.models.economics import (
+    HouseholdEmployment,
+    ManorAnnualResolution,
+    ManorAsset,
+    ManorAssetLedger,
+    ManorDefenseLayer,
+    ManorTreasuryEntry,
+)
 from app.models.event import DiceLog, Event, EventLink, EventVisibility
 from app.models.family import (
     CharacterParentage,
@@ -102,4 +110,10 @@ __all__ = [
     "CharacterWoundLedger",
     "WinterPhase",
     "WinterPhaseParticipant",
+    "HouseholdEmployment",
+    "ManorAnnualResolution",
+    "ManorAsset",
+    "ManorAssetLedger",
+    "ManorDefenseLayer",
+    "ManorTreasuryEntry",
 ]
