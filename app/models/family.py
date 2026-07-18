@@ -40,6 +40,7 @@ class FamilyMembership(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "family_memberships"
 
     campaign_id: Mapped[UUID] = mapped_column(ForeignKey("campaigns.id", ondelete="RESTRICT"))
+    source_key: Mapped[str | None] = mapped_column(Text)
     family_id: Mapped[UUID] = mapped_column(ForeignKey("families.id", ondelete="RESTRICT"))
     character_id: Mapped[UUID] = mapped_column(ForeignKey("characters.id", ondelete="RESTRICT"))
     membership_type: Mapped[str] = mapped_column(Text, default="birth")
@@ -68,6 +69,7 @@ class CharacterParentage(UUIDPrimaryKeyMixin, Base):
     )
 
     campaign_id: Mapped[UUID] = mapped_column(ForeignKey("campaigns.id", ondelete="RESTRICT"))
+    source_key: Mapped[str | None] = mapped_column(Text)
     parent_character_id: Mapped[UUID] = mapped_column(
         ForeignKey("characters.id", ondelete="RESTRICT")
     )
@@ -92,6 +94,7 @@ class Marriage(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "marriages"
 
     campaign_id: Mapped[UUID] = mapped_column(ForeignKey("campaigns.id", ondelete="RESTRICT"))
+    source_key: Mapped[str | None] = mapped_column(Text)
     spouse_one_id: Mapped[UUID] = mapped_column(ForeignKey("characters.id", ondelete="RESTRICT"))
     spouse_two_id: Mapped[UUID] = mapped_column(ForeignKey("characters.id", ondelete="RESTRICT"))
     start_event_id: Mapped[UUID | None] = mapped_column(
@@ -116,6 +119,7 @@ class InheritanceCase(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "inheritance_cases"
 
     campaign_id: Mapped[UUID] = mapped_column(ForeignKey("campaigns.id", ondelete="RESTRICT"))
+    source_key: Mapped[str | None] = mapped_column(Text)
     decedent_character_id: Mapped[UUID] = mapped_column(
         ForeignKey("characters.id", ondelete="RESTRICT")
     )
@@ -145,6 +149,7 @@ class InheritanceHeir(UUIDPrimaryKeyMixin, Base):
     __table_args__ = (UniqueConstraint("inheritance_case_id", "character_id"),)
 
     campaign_id: Mapped[UUID] = mapped_column(ForeignKey("campaigns.id", ondelete="RESTRICT"))
+    source_key: Mapped[str | None] = mapped_column(Text)
     inheritance_case_id: Mapped[UUID] = mapped_column(
         ForeignKey("inheritance_cases.id", ondelete="RESTRICT")
     )

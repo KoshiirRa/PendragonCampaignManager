@@ -12,21 +12,28 @@ from app.models import (
     Character,
     CharacterInventoryLedger,
     CharacterNote,
+    CharacterParentage,
     CharacterPassion,
     CharacterPassionLedger,
     CharacterSkillLedger,
     CharacterStatLedger,
+    CharacterStatus,
     CharacterStatusLedger,
     CharacterTraitLedger,
     Event,
     EventLink,
     EventVisibility,
+    Family,
+    FamilyMembership,
     GloryLedger,
     Horse,
     HorseOwnershipHistory,
     HorseStatLedger,
+    InheritanceCase,
+    InheritanceHeir,
     InventoryItem,
     KnowledgeScope,
+    Marriage,
     SkillDefinition,
     TraitDefinition,
     WeaponProfile,
@@ -667,6 +674,258 @@ async def sync_foundry_snapshot(
                 ownership_pending.append((new_ownership, "start"))
                 ownership_by_horse[horse.id] = new_ownership
                 ownership_changes += 1
+
+    relatives_created = 0
+    family_links_created = 0
+    relationships_created = 0
+    inheritance_records_created = 0
+    family_event_fields: list[tuple[Any, str]] = []
+    if data.relatives is not None:
+        family = None
+        if data.family_name:
+            family = await db.scalar(
+                select(Family).where(
+                    Family.campaign_id == campaign_id,
+                    func.lower(Family.name) == data.family_name.casefold(),
+                    Family.archived_at.is_(None),
+                )
+            )
+            if family is None:
+                family = Family(
+                    campaign_id=campaign_id,
+                    name=data.family_name,
+                    scope=KnowledgeScope.PLAYERS,
+                    metadata_={"source": "foundry_vtt"},
+                )
+                db.add(family)
+                await db.flush()
+
+        relatives = list(
+            await db.scalars(
+                select(Character).where(
+                    Character.campaign_id == campaign_id,
+                    Character.foundry_uuid.in_([item.source_key for item in data.relatives]),
+                )
+            )
+        )
+        relative_by_source = {item.foundry_uuid: item for item in relatives}
+        existing_memberships = {
+            item.source_key: item
+            for item in await db.scalars(
+                select(FamilyMembership).where(FamilyMembership.campaign_id == campaign_id)
+            )
+            if item.source_key
+        }
+        existing_parentage = {
+            item.source_key: item
+            for item in await db.scalars(
+                select(CharacterParentage).where(CharacterParentage.campaign_id == campaign_id)
+            )
+            if item.source_key
+        }
+        existing_marriages = {
+            item.source_key: item
+            for item in await db.scalars(
+                select(Marriage).where(Marriage.campaign_id == campaign_id)
+            )
+            if item.source_key
+        }
+        existing_cases = {
+            item.source_key: item
+            for item in await db.scalars(
+                select(InheritanceCase).where(InheritanceCase.campaign_id == campaign_id)
+            )
+            if item.source_key
+        }
+        existing_heirs = {
+            item.source_key: item
+            for item in await db.scalars(
+                select(InheritanceHeir).where(InheritanceHeir.campaign_id == campaign_id)
+            )
+            if item.source_key
+        }
+
+        if family:
+            actor_membership_key = f"{character.foundry_uuid}:family:{family.id}"
+            if actor_membership_key not in existing_memberships:
+                membership = FamilyMembership(
+                    campaign_id=campaign_id,
+                    family_id=family.id,
+                    character_id=character_id,
+                    source_key=actor_membership_key,
+                    membership_type="birth",
+                    start_year=character.birth_year,
+                    is_primary=True,
+                    scope=KnowledgeScope.PLAYERS,
+                )
+                db.add(membership)
+                family_event_fields.append((membership, "start_event_id"))
+                family_links_created += 1
+
+        for snapshot in data.relatives:
+            relative = relative_by_source.get(snapshot.source_key)
+            if relative is None:
+                relative = Character(
+                    campaign_id=campaign_id,
+                    kind="npc",
+                    name=snapshot.name,
+                    gender=snapshot.gender,
+                    birth_year=snapshot.birth_year,
+                    status="dead" if snapshot.death_year else "alive",
+                    foundry_uuid=snapshot.source_key,
+                    metadata_={
+                        "source": "foundry_family_item",
+                        "blessed_birth": snapshot.blessed_birth,
+                    },
+                )
+                db.add(relative)
+                await db.flush()
+                relative_by_source[snapshot.source_key] = relative
+                relatives_created += 1
+                pending.append(
+                    CharacterStatusLedger(
+                        campaign_id=campaign_id,
+                        character_id=relative.id,
+                        status="dead" if snapshot.death_year else "alive",
+                        effective_year=snapshot.death_year
+                        or snapshot.birth_year
+                        or data.effective_year,
+                        reason="Imported from Foundry VTT family record",
+                    )
+                )
+            else:
+                if relative.birth_year is None and snapshot.birth_year:
+                    relative.birth_year = snapshot.birth_year
+                if relative.gender is None and snapshot.gender:
+                    relative.gender = snapshot.gender
+                if snapshot.death_year and relative.status != CharacterStatus.DEAD:
+                    relative.status = CharacterStatus.DEAD
+                    pending.append(
+                        CharacterStatusLedger(
+                            campaign_id=campaign_id,
+                            character_id=relative.id,
+                            status=CharacterStatus.DEAD,
+                            effective_year=snapshot.death_year,
+                            reason="Death recorded by Foundry VTT family record",
+                        )
+                    )
+
+            if family:
+                membership_key = f"{snapshot.source_key}:family:{family.id}"
+                if membership_key not in existing_memberships:
+                    membership = FamilyMembership(
+                        campaign_id=campaign_id,
+                        family_id=family.id,
+                        character_id=relative.id,
+                        source_key=membership_key,
+                        membership_type="marriage" if snapshot.relation == "spouse" else "birth",
+                        start_year=snapshot.birth_year,
+                        is_primary=snapshot.relation != "spouse",
+                        scope=KnowledgeScope.PLAYERS,
+                    )
+                    db.add(membership)
+                    family_event_fields.append((membership, "start_event_id"))
+                    family_links_created += 1
+
+            relation_key = f"{character.foundry_uuid}:relative:{snapshot.source_key}"
+            if snapshot.relation in {"parent", "child"} and relation_key not in existing_parentage:
+                parent_id, child_id = (
+                    (relative.id, character_id)
+                    if snapshot.relation == "parent"
+                    else (character_id, relative.id)
+                )
+                parentage = CharacterParentage(
+                    campaign_id=campaign_id,
+                    source_key=relation_key,
+                    parent_character_id=parent_id,
+                    child_character_id=child_id,
+                    relationship_type="biological",
+                    certainty="confirmed",
+                    scope=KnowledgeScope.PLAYERS,
+                )
+                db.add(parentage)
+                family_event_fields.append((parentage, "event_id"))
+                relationships_created += 1
+            elif snapshot.relation == "spouse" and relation_key not in existing_marriages:
+                spouse_one, spouse_two = sorted((character_id, relative.id), key=str)
+                marriage = Marriage(
+                    campaign_id=campaign_id,
+                    source_key=relation_key,
+                    spouse_one_id=spouse_one,
+                    spouse_two_id=spouse_two,
+                    start_year=data.effective_year,
+                    scope=KnowledgeScope.PLAYERS,
+                    notes=(
+                        "Foundry marks this marriage as barren"
+                        if snapshot.barren_marriage
+                        else None
+                    ),
+                )
+                db.add(marriage)
+                family_event_fields.append((marriage, "start_event_id"))
+                relationships_created += 1
+
+            if data.is_heir and snapshot.relation == "parent" and snapshot.death_year:
+                case_key = f"{snapshot.source_key}:inheritance"
+                inheritance = existing_cases.get(case_key)
+                if inheritance is None:
+                    inheritance = InheritanceCase(
+                        campaign_id=campaign_id,
+                        source_key=case_key,
+                        decedent_character_id=relative.id,
+                        opened_year=snapshot.death_year,
+                        scope=KnowledgeScope.PLAYERS,
+                        notes="Created from Foundry heir designation",
+                    )
+                    db.add(inheritance)
+                    await db.flush()
+                    family_event_fields.append((inheritance, "opened_event_id"))
+                    existing_cases[case_key] = inheritance
+                    inheritance_records_created += 1
+
+        relative_ids = [item.id for item in relative_by_source.values()]
+        relative_glory = dict(
+            (
+                await db.execute(
+                    select(
+                        GloryLedger.character_id,
+                        func.coalesce(func.sum(GloryLedger.amount), 0),
+                    )
+                    .where(GloryLedger.character_id.in_(relative_ids))
+                    .group_by(GloryLedger.character_id)
+                )
+            ).all()
+        )
+        for snapshot in data.relatives:
+            relative = relative_by_source[snapshot.source_key]
+            adjustment = snapshot.glory_total - int(relative_glory.get(relative.id, 0))
+            if adjustment:
+                pending.append(
+                    GloryLedger(
+                        campaign_id=campaign_id,
+                        character_id=relative.id,
+                        awarded_year=data.effective_year,
+                        amount=adjustment,
+                        category="foundry_family_sync",
+                        reason="Foundry VTT family Glory reconciliation",
+                        scope=KnowledgeScope.PLAYERS,
+                    )
+                )
+                heir_key = f"{case_key}:heir:{character.foundry_uuid}"
+                if heir_key not in existing_heirs:
+                    db.add(
+                        InheritanceHeir(
+                            campaign_id=campaign_id,
+                            source_key=heir_key,
+                            inheritance_case_id=inheritance.id,
+                            character_id=character_id,
+                            priority=1,
+                            relationship_description="child",
+                            claim_status="designated",
+                            designated=True,
+                        )
+                    )
+                    inheritance_records_created += 1
             previous = latest_horse_stats.get(horse.id)
             if previous and all(
                 getattr(previous, field) == getattr(snapshot, field) for field in horse_fields
@@ -694,7 +953,13 @@ async def sync_foundry_snapshot(
                 ownership_changes += 1
 
     event = None
-    if pending or ownership_pending:
+    family_changed = bool(
+        relatives_created
+        or family_links_created
+        or relationships_created
+        or inheritance_records_created
+    )
+    if pending or ownership_pending or family_event_fields or family_changed:
         event = Event(
             campaign_id=campaign_id,
             event_type="foundry_character_sync",
@@ -702,7 +967,8 @@ async def sync_foundry_snapshot(
             description=(
                 f"Recorded {trait_added} trait, {skill_added} skill, "
                 f"{passion_added} passion, {stat_added} statistic, {inventory_added} inventory, "
-                f"{horse_added} horse, and Glory {glory_adjustment:+d} changes."
+                f"{horse_added} horse, {relationships_created} relationship, and Glory "
+                f"{glory_adjustment:+d} changes."
             ),
             in_game_year=data.effective_year,
             visibility=EventVisibility.PLAYERS,
@@ -716,8 +982,11 @@ async def sync_foundry_snapshot(
                 ownership.start_event_id = event.id
             else:
                 ownership.end_event_id = event.id
+        for item, field in family_event_fields:
+            setattr(item, field, event.id)
         for item in pending:
-            item.event_id = event.id
+            if hasattr(item, "event_id"):
+                item.event_id = event.id
             db.add(item)
     try:
         await db.flush()
@@ -744,7 +1013,11 @@ async def sync_foundry_snapshot(
         horses_created=horses_created,
         horse_entries_added=horse_added,
         ownership_changes=ownership_changes,
-        changed=bool(pending or ownership_pending),
+        relatives_created=relatives_created,
+        family_links_created=family_links_created,
+        relationships_created=relationships_created,
+        inheritance_records_created=inheritance_records_created,
+        changed=bool(pending or ownership_pending or family_event_fields or family_changed),
     )
 
 

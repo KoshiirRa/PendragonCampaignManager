@@ -27,6 +27,8 @@ MIGRATION_MAP = {
     / "supabase/migrations/202607170012_foundry_character_sync.sql",
     ROOT / "migrations/013_character_possessions.sql": ROOT
     / "supabase/migrations/202607170013_character_possessions.sql",
+    ROOT / "migrations/014_foundry_family_sync.sql": ROOT
+    / "supabase/migrations/202607170014_foundry_family_sync.sql",
 }
 SEED_SOURCES = (ROOT / "seed/001_campaign.sql", ROOT / "seed/002_characters_and_manor.sql")
 SEED_DESTINATION = ROOT / "supabase/seed.sql"

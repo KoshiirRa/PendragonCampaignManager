@@ -44,6 +44,11 @@ erDiagram
     CHARACTERS ||--o{ FAMILY_MEMBERSHIPS : belongs_through
     CHARACTERS ||--o{ CHARACTER_PARENTAGE : parent
     CHARACTERS ||--o{ CHARACTER_PARENTAGE : child
+    CHARACTERS ||--o{ FAMILY_MEMBERSHIPS : member
+    FAMILIES ||--o{ FAMILY_MEMBERSHIPS : contains
+    CHARACTERS ||--o{ MARRIAGES : spouse
+    CHARACTERS ||--o{ INHERITANCE_CASES : decedent
+    INHERITANCE_CASES ||--o{ INHERITANCE_HEIRS : candidates
     CHARACTERS ||--o{ MARRIAGES : spouse
     CHARACTERS ||--o{ INHERITANCE_CASES : decedent
     INHERITANCE_CASES ||--o{ INHERITANCE_HEIRS : considers

@@ -44,6 +44,8 @@ historical edits should continue to use the individual append-only ledger endpoi
 
 Family endpoints live under `/api/v1/campaigns/{campaign_id}`. Create and list families, add memberships and parentage, record marriages, open inheritance cases, register heirs, and transfer manors through the corresponding nested resources.
 
+The Foundry snapshot endpoint also accepts `family_name`, `relatives`, and `is_heir`. Relative Item UUIDs become durable NPC identities. Repeated snapshots reuse those identities and do not duplicate memberships, parentage, marriages, or inheritance claims. A marriage without a year in Foundry begins at the first synchronized campaign year. An inheritance case is inferred only when the knight is marked as heir and a parent has a death year.
+
 Ancestral entries use `POST /families/{family_id}/history`. The service creates the central event automatically and can also create a linked Glory ledger entry when `glory_amount` and `ancestor_character_id` are supplied. Use `GET /families/{family_id}/history?before_year=480` for the pre-480 timeline.
 
 Sources are campaign-owned records at `/source-references`; `source_locator` on each history entry can hold a page, table, section, URL, or other user-defined locator.

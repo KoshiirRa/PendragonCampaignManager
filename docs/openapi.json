@@ -5472,6 +5472,39 @@
               }
             ],
             "title": "Horses"
+          },
+          "family_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Family Name"
+          },
+          "relatives": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FoundryRelativeSnapshot"
+                },
+                "type": "array",
+                "maxItems": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relatives"
+          },
+          "is_heir": {
+            "type": "boolean",
+            "title": "Is Heir",
+            "default": false
           }
         },
         "type": "object",
@@ -5548,6 +5581,26 @@
           "ownership_changes": {
             "type": "integer",
             "title": "Ownership Changes",
+            "default": 0
+          },
+          "relatives_created": {
+            "type": "integer",
+            "title": "Relatives Created",
+            "default": 0
+          },
+          "family_links_created": {
+            "type": "integer",
+            "title": "Family Links Created",
+            "default": 0
+          },
+          "relationships_created": {
+            "type": "integer",
+            "title": "Relationships Created",
+            "default": 0
+          },
+          "inheritance_records_created": {
+            "type": "integer",
+            "title": "Inheritance Records Created",
             "default": 0
           },
           "changed": {
@@ -5886,6 +5939,103 @@
           "value"
         ],
         "title": "FoundryPassionSnapshot"
+      },
+      "FoundryRelativeSnapshot": {
+        "properties": {
+          "source_key": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Source Key"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "relation": {
+            "type": "string",
+            "enum": [
+              "parent",
+              "spouse",
+              "child",
+              "other"
+            ],
+            "title": "Relation"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "birth_year": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 9999.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Year"
+          },
+          "death_year": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 9999.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Death Year"
+          },
+          "glory_total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Glory Total",
+            "default": 0
+          },
+          "blessed_birth": {
+            "type": "boolean",
+            "title": "Blessed Birth",
+            "default": false
+          },
+          "barren_marriage": {
+            "type": "boolean",
+            "title": "Barren Marriage",
+            "default": false
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_key",
+          "name",
+          "relation"
+        ],
+        "title": "FoundryRelativeSnapshot"
       },
       "FoundrySkillSnapshot": {
         "properties": {

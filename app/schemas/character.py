@@ -279,6 +279,25 @@ class FoundryHorseSnapshot(ORMModel):
     equipped: bool = False
 
 
+class FoundryRelativeSnapshot(ORMModel):
+    source_key: str = Field(min_length=1, max_length=500)
+    name: str = Field(min_length=1, max_length=300)
+    relation: Literal["parent", "spouse", "child", "other"]
+    gender: str | None = None
+    birth_year: int | None = Field(default=None, ge=1, le=9999)
+    death_year: int | None = Field(default=None, ge=1, le=9999)
+    glory_total: int = Field(default=0, ge=0)
+    blessed_birth: bool = False
+    barren_marriage: bool = False
+    description: str | None = None
+
+    @model_validator(mode="after")
+    def valid_lifespan(self) -> "FoundryRelativeSnapshot":
+        if self.birth_year and self.death_year and self.death_year < self.birth_year:
+            raise ValueError("death_year cannot precede birth_year")
+        return self
+
+
 class FoundryCharacterSnapshot(ORMModel):
     effective_year: int = Field(ge=1, le=9999)
     traits: list[FoundryTraitSnapshot] = Field(default_factory=list, max_length=100)
@@ -288,6 +307,9 @@ class FoundryCharacterSnapshot(ORMModel):
     stats: list[FoundryStatSnapshot] | None = Field(default=None, max_length=5)
     inventory: list[FoundryInventorySnapshot] | None = Field(default=None, max_length=500)
     horses: list[FoundryHorseSnapshot] | None = Field(default=None, max_length=100)
+    family_name: str | None = Field(default=None, min_length=1, max_length=300)
+    relatives: list[FoundryRelativeSnapshot] | None = Field(default=None, max_length=500)
+    is_heir: bool = False
 
     @model_validator(mode="after")
     def unique_source_keys(self) -> "FoundryCharacterSnapshot":
@@ -300,6 +322,7 @@ class FoundryCharacterSnapshot(ORMModel):
             ("passion", self.passions),
             ("inventory", self.inventory or []),
             ("horse", self.horses or []),
+            ("relative", self.relatives or []),
         ):
             keys = [value.source_key for value in values]
             if len(keys) != len(set(keys)):
@@ -321,4 +344,8 @@ class FoundryCharacterSyncResult(ORMModel):
     horses_created: int = 0
     horse_entries_added: int = 0
     ownership_changes: int = 0
+    relatives_created: int = 0
+    family_links_created: int = 0
+    relationships_created: int = 0
+    inheritance_records_created: int = 0
     changed: bool
