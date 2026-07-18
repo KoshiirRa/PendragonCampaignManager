@@ -234,19 +234,72 @@ class FoundryPassionSnapshot(ORMModel):
     value: int = Field(ge=0)
 
 
+class FoundryStatSnapshot(ORMModel):
+    code: Literal["siz", "dex", "str", "con", "app"]
+    value: int = Field(ge=0)
+
+
+class FoundryInventorySnapshot(ORMModel):
+    source_key: str = Field(min_length=1, max_length=500)
+    item_type: Literal["gear", "weapon", "armour"]
+    name: str = Field(min_length=1, max_length=300)
+    description: str | None = None
+    quantity: int = Field(default=1, ge=0)
+    equipped: bool = False
+    libra: int = Field(default=0, ge=0)
+    denarii: int = Field(default=0, ge=0)
+    skill: str | None = None
+    damage_formula: str | None = None
+    weapon_range: str | None = None
+    mounted_use: str | None = None
+    melee: bool = True
+    armour_points: int = Field(default=0, ge=0)
+    material: str | None = None
+    is_shield: bool = False
+
+
+class FoundryHorseSnapshot(ORMModel):
+    source_key: str = Field(min_length=1, max_length=500)
+    name: str = Field(min_length=1, max_length=300)
+    breed: str | None = None
+    colour: str | None = None
+    personality: str | None = None
+    features: str | None = None
+    description: str | None = None
+    siz: int = Field(default=0, ge=0)
+    dex: int = Field(default=0, ge=0)
+    str: int = Field(default=0, ge=0)
+    con: int = Field(default=0, ge=0)
+    hp: int = Field(default=0, ge=0)
+    max_hp: int = Field(default=0, ge=0)
+    move: int = Field(default=0, ge=0)
+    armour: int = Field(default=0, ge=0)
+    horse_armour: int = Field(default=0, ge=0)
+    age: int = Field(default=0, ge=0)
+    equipped: bool = False
+
+
 class FoundryCharacterSnapshot(ORMModel):
     effective_year: int = Field(ge=1, le=9999)
     traits: list[FoundryTraitSnapshot] = Field(default_factory=list, max_length=100)
     skills: list[FoundrySkillSnapshot] = Field(default_factory=list, max_length=300)
     passions: list[FoundryPassionSnapshot] = Field(default_factory=list, max_length=100)
     glory_total: int = Field(ge=0)
+    stats: list[FoundryStatSnapshot] | None = Field(default=None, max_length=5)
+    inventory: list[FoundryInventorySnapshot] | None = Field(default=None, max_length=500)
+    horses: list[FoundryHorseSnapshot] | None = Field(default=None, max_length=100)
 
     @model_validator(mode="after")
     def unique_source_keys(self) -> "FoundryCharacterSnapshot":
+        stat_codes = [stat.code for stat in self.stats or []]
+        if len(stat_codes) != len(set(stat_codes)):
+            raise ValueError("duplicate statistic code")
         for label, values in (
             ("trait", self.traits),
             ("skill", self.skills),
             ("passion", self.passions),
+            ("inventory", self.inventory or []),
+            ("horse", self.horses or []),
         ):
             keys = [value.source_key for value in values]
             if len(keys) != len(set(keys)):
@@ -262,4 +315,10 @@ class FoundryCharacterSyncResult(ORMModel):
     passions_created: int
     passion_entries_added: int
     glory_adjustment: int
+    stat_entries_added: int = 0
+    inventory_items_created: int = 0
+    inventory_entries_added: int = 0
+    horses_created: int = 0
+    horse_entries_added: int = 0
+    ownership_changes: int = 0
     changed: bool

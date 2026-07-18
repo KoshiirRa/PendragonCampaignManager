@@ -57,6 +57,34 @@ def test_foundry_snapshot_rejects_duplicate_item_source_keys() -> None:
         )
 
 
+def test_foundry_snapshot_accepts_statistics_inventory_and_horses() -> None:
+    snapshot = FoundryCharacterSnapshot(
+        effective_year=485,
+        glory_total=1910,
+        stats=[{"code": "siz", "value": 18}],
+        inventory=[
+            {
+                "source_key": "Actor.test.Item.shield",
+                "item_type": "armour",
+                "name": "Shield",
+                "equipped": True,
+                "armour_points": 6,
+            }
+        ],
+        horses=[
+            {
+                "source_key": "Actor.test.Item.horse",
+                "name": "Bucephalus",
+                "breed": "Courser",
+                "siz": 30,
+            }
+        ],
+    )
+    assert snapshot.stats[0].code == "siz"
+    assert snapshot.inventory[0].armour_points == 6
+    assert snapshot.horses[0].breed == "Courser"
+
+
 def test_manor_requires_manor_location_kind() -> None:
     with pytest.raises(ValidationError):
         ManorCreate(location={"kind": "castle", "name": "Not a manor"})

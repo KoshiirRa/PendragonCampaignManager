@@ -26,10 +26,16 @@ The same rule applies to character-value, Glory, tenure, and improvement ledgers
 ## Foundry character synchronization
 
 `POST /api/v1/campaigns/{campaign_id}/characters/{character_id}/foundry-snapshot` accepts the
-current in-game year, all current trait/skill/passion values, and total Glory. Stable Foundry PID
+current in-game year, core statistics, trait/skill/passion values, total Glory, inventory, and
+horses. Stable Foundry PID
 or Item UUID source keys identify definitions across repeated requests. The service appends only
 values that differ from the latest ledger state and reconciles Glory with a signed ledger entry.
 An unchanged snapshot returns `changed: false` and creates no event or ledger rows.
+
+Inventory items have normalized weapon and armour profiles. Quantity and equipped state are
+historical ledger values; an item absent from a later complete inventory snapshot receives a
+zero-quantity entry. Horses are durable identities with effective-dated ownership and append-only
+statistics. A horse absent from a later complete horse snapshot closes its current ownership.
 
 When a snapshot changes history, the service creates one `foundry_character_sync` event and links
 every new ledger entry to it. This endpoint is intended for machine synchronization; ordinary

@@ -36,6 +36,16 @@ from app.models.location import (
     ManorImprovementLedger,
     ManorTenure,
 )
+from app.models.possession import (
+    ArmourProfile,
+    CharacterInventoryLedger,
+    CharacterStatLedger,
+    Horse,
+    HorseOwnershipHistory,
+    HorseStatLedger,
+    InventoryItem,
+    WeaponProfile,
+)
 
 __all__ = [
     "Base",
@@ -74,4 +84,12 @@ __all__ = [
     "SkillDefinition",
     "SourceReference",
     "TraitDefinition",
+    "ArmourProfile",
+    "CharacterInventoryLedger",
+    "CharacterStatLedger",
+    "Horse",
+    "HorseOwnershipHistory",
+    "HorseStatLedger",
+    "InventoryItem",
+    "WeaponProfile",
 ]

@@ -8,20 +8,28 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import (
+    ArmourProfile,
     Character,
+    CharacterInventoryLedger,
     CharacterNote,
     CharacterPassion,
     CharacterPassionLedger,
     CharacterSkillLedger,
+    CharacterStatLedger,
     CharacterStatusLedger,
     CharacterTraitLedger,
     Event,
     EventLink,
     EventVisibility,
     GloryLedger,
+    Horse,
+    HorseOwnershipHistory,
+    HorseStatLedger,
+    InventoryItem,
     KnowledgeScope,
     SkillDefinition,
     TraitDefinition,
+    WeaponProfile,
 )
 from app.schemas.character import (
     CharacterCreate,
@@ -478,15 +486,223 @@ async def sync_foundry_snapshot(
             )
         )
 
+    stat_added = 0
+    if data.stats is not None:
+        latest_stats = await _latest_by_key(
+            db,
+            CharacterStatLedger,
+            CharacterStatLedger.stat_code,
+            CharacterStatLedger.character_id == character_id,
+        )
+        for snapshot in data.stats:
+            previous = latest_stats.get(snapshot.code)
+            if previous and previous.value == snapshot.value:
+                continue
+            pending.append(
+                CharacterStatLedger(
+                    campaign_id=campaign_id,
+                    character_id=character_id,
+                    stat_code=snapshot.code,
+                    effective_year=data.effective_year,
+                    value=snapshot.value,
+                    reason=reason,
+                )
+            )
+            stat_added += 1
+
+    inventory_created = 0
+    inventory_added = 0
+    if data.inventory is not None:
+        items = list(
+            await db.scalars(select(InventoryItem).where(InventoryItem.campaign_id == campaign_id))
+        )
+        item_by_source = {item.source_key: item for item in items}
+        latest_inventory = await _latest_by_key(
+            db,
+            CharacterInventoryLedger,
+            CharacterInventoryLedger.inventory_item_id,
+            CharacterInventoryLedger.character_id == character_id,
+        )
+        incoming_keys = {snapshot.source_key for snapshot in data.inventory}
+        for snapshot in data.inventory:
+            item = item_by_source.get(snapshot.source_key)
+            if item is None:
+                item = InventoryItem(
+                    campaign_id=campaign_id,
+                    source_key=snapshot.source_key,
+                    item_type=snapshot.item_type,
+                    name=snapshot.name,
+                    description=snapshot.description,
+                    libra=snapshot.libra,
+                    denarii=snapshot.denarii,
+                )
+                db.add(item)
+                await db.flush()
+                item_by_source[snapshot.source_key] = item
+                inventory_created += 1
+                if snapshot.item_type == "weapon":
+                    db.add(
+                        WeaponProfile(
+                            inventory_item_id=item.id,
+                            skill=snapshot.skill,
+                            damage_formula=snapshot.damage_formula,
+                            weapon_range=snapshot.weapon_range,
+                            mounted_use=snapshot.mounted_use,
+                            melee=snapshot.melee,
+                        )
+                    )
+                elif snapshot.item_type == "armour":
+                    db.add(
+                        ArmourProfile(
+                            inventory_item_id=item.id,
+                            armour_points=snapshot.armour_points,
+                            material=snapshot.material,
+                            is_shield=snapshot.is_shield,
+                        )
+                    )
+            previous = latest_inventory.get(item.id)
+            if previous and (previous.quantity, previous.equipped) == (
+                snapshot.quantity,
+                snapshot.equipped,
+            ):
+                continue
+            pending.append(
+                CharacterInventoryLedger(
+                    campaign_id=campaign_id,
+                    character_id=character_id,
+                    inventory_item_id=item.id,
+                    effective_year=data.effective_year,
+                    quantity=snapshot.quantity,
+                    equipped=snapshot.equipped,
+                    reason=reason,
+                )
+            )
+            inventory_added += 1
+        for item in items:
+            previous = latest_inventory.get(item.id)
+            if item.source_key not in incoming_keys and previous and previous.quantity > 0:
+                pending.append(
+                    CharacterInventoryLedger(
+                        campaign_id=campaign_id,
+                        character_id=character_id,
+                        inventory_item_id=item.id,
+                        effective_year=data.effective_year,
+                        quantity=0,
+                        equipped=False,
+                        reason="Absent from Foundry VTT inventory snapshot",
+                    )
+                )
+                inventory_added += 1
+
+    horses_created = 0
+    horse_added = 0
+    ownership_changes = 0
+    ownership_pending: list[tuple[HorseOwnershipHistory, str]] = []
+    if data.horses is not None:
+        horses = list(await db.scalars(select(Horse).where(Horse.campaign_id == campaign_id)))
+        horse_by_source = {horse.source_key: horse for horse in horses}
+        open_ownerships = list(
+            await db.scalars(
+                select(HorseOwnershipHistory).where(
+                    HorseOwnershipHistory.campaign_id == campaign_id,
+                    HorseOwnershipHistory.end_year.is_(None),
+                )
+            )
+        )
+        ownership_by_horse = {ownership.horse_id: ownership for ownership in open_ownerships}
+        latest_horse_stats = (
+            await _latest_by_key(
+                db,
+                HorseStatLedger,
+                HorseStatLedger.horse_id,
+                HorseStatLedger.horse_id.in_([horse.id for horse in horses]),
+            )
+            if horses
+            else {}
+        )
+        incoming_keys = {snapshot.source_key for snapshot in data.horses}
+        horse_fields = (
+            "siz",
+            "dex",
+            "str",
+            "con",
+            "hp",
+            "max_hp",
+            "move",
+            "armour",
+            "horse_armour",
+            "age",
+            "equipped",
+        )
+        for snapshot in data.horses:
+            horse = horse_by_source.get(snapshot.source_key)
+            if horse is None:
+                horse = Horse(
+                    campaign_id=campaign_id,
+                    source_key=snapshot.source_key,
+                    name=snapshot.name,
+                    breed=snapshot.breed,
+                    colour=snapshot.colour,
+                    personality=snapshot.personality,
+                    features=snapshot.features,
+                    description=snapshot.description,
+                )
+                db.add(horse)
+                await db.flush()
+                horse_by_source[snapshot.source_key] = horse
+                horses_created += 1
+            ownership = ownership_by_horse.get(horse.id)
+            if ownership is None or ownership.character_id != character_id:
+                if ownership is not None:
+                    ownership.end_year = data.effective_year
+                    ownership_pending.append((ownership, "end"))
+                    await db.flush()
+                new_ownership = HorseOwnershipHistory(
+                    campaign_id=campaign_id,
+                    horse_id=horse.id,
+                    character_id=character_id,
+                    start_year=data.effective_year,
+                )
+                db.add(new_ownership)
+                ownership_pending.append((new_ownership, "start"))
+                ownership_by_horse[horse.id] = new_ownership
+                ownership_changes += 1
+            previous = latest_horse_stats.get(horse.id)
+            if previous and all(
+                getattr(previous, field) == getattr(snapshot, field) for field in horse_fields
+            ):
+                continue
+            pending.append(
+                HorseStatLedger(
+                    campaign_id=campaign_id,
+                    horse_id=horse.id,
+                    effective_year=data.effective_year,
+                    reason=reason,
+                    **{field: getattr(snapshot, field) for field in horse_fields},
+                )
+            )
+            horse_added += 1
+        for horse in horses:
+            ownership = ownership_by_horse.get(horse.id)
+            if (
+                horse.source_key not in incoming_keys
+                and ownership
+                and ownership.character_id == character_id
+            ):
+                ownership.end_year = data.effective_year
+                ownership_pending.append((ownership, "end"))
+                ownership_changes += 1
+
     event = None
-    if pending:
+    if pending or ownership_pending:
         event = Event(
             campaign_id=campaign_id,
             event_type="foundry_character_sync",
             title=f"Synchronized {character.name} from Foundry VTT",
             description=(
                 f"Recorded {trait_added} trait, {skill_added} skill, "
-                f"{passion_added} passion, and Glory {glory_adjustment:+d} changes."
+                f"{passion_added} passion, {stat_added} statistic, {inventory_added} inventory, "
+                f"{horse_added} horse, and Glory {glory_adjustment:+d} changes."
             ),
             in_game_year=data.effective_year,
             visibility=EventVisibility.PLAYERS,
@@ -495,6 +711,11 @@ async def sync_foundry_snapshot(
         db.add(event)
         await db.flush()
         db.add(EventLink(event_id=event.id, entity_type="character", entity_id=character_id))
+        for ownership, boundary in ownership_pending:
+            if boundary == "start":
+                ownership.start_event_id = event.id
+            else:
+                ownership.end_event_id = event.id
         for item in pending:
             item.event_id = event.id
             db.add(item)
@@ -517,7 +738,13 @@ async def sync_foundry_snapshot(
         passions_created=passions_created,
         passion_entries_added=passion_added,
         glory_adjustment=glory_adjustment,
-        changed=bool(pending),
+        stat_entries_added=stat_added,
+        inventory_items_created=inventory_created,
+        inventory_entries_added=inventory_added,
+        horses_created=horses_created,
+        horse_entries_added=horse_added,
+        ownership_changes=ownership_changes,
+        changed=bool(pending or ownership_pending),
     )
 
 

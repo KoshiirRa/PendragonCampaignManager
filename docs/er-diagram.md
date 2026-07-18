@@ -24,6 +24,14 @@ erDiagram
     CHARACTERS ||--o{ CHARACTER_PASSIONS : holds
     CHARACTER_PASSIONS ||--o{ CHARACTER_PASSION_LEDGER : tracks
     CHARACTERS ||--o{ GLORY_LEDGER : earns
+    CHARACTERS ||--o{ CHARACTER_STAT_LEDGER : develops
+    CHARACTERS ||--o{ CHARACTER_INVENTORY_LEDGER : possesses
+    INVENTORY_ITEMS ||--o{ CHARACTER_INVENTORY_LEDGER : tracks
+    INVENTORY_ITEMS ||--o| WEAPON_PROFILES : specializes
+    INVENTORY_ITEMS ||--o| ARMOUR_PROFILES : specializes
+    HORSES ||--o{ HORSE_OWNERSHIP_HISTORY : owned_through
+    CHARACTERS ||--o{ HORSE_OWNERSHIP_HISTORY : owns
+    HORSES ||--o{ HORSE_STAT_LEDGER : develops
     CAMPAIGNS ||--o{ LOCATIONS : contains
     LOCATIONS o|--o{ LOCATIONS : contains
     LOCATIONS ||--o| MANORS : specializes

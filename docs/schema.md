@@ -56,6 +56,14 @@ Locations form a campaign-scoped hierarchy and may also have graph connections f
 | `character_passions` | Named, scoped character passions |
 | `character_passion_ledger` | Historical passion values |
 | `glory_ledger` | Signed, categorized Glory awards and corrections |
+| `character_stat_ledger` | Historical SIZ, DEX, STR, CON, and APP values |
+| `inventory_items` | Stable gear, weapon, and armour identities |
+| `weapon_profiles` | Normalized weapon-specific properties |
+| `armour_profiles` | Normalized armour and shield properties |
+| `character_inventory_ledger` | Historical quantity and equipped state |
+| `horses` | Stable horse identities sourced from Foundry Items |
+| `horse_ownership_history` | Effective-dated horse ownership |
+| `horse_stat_ledger` | Historical horse attributes and readiness |
 | `locations` | Hierarchical campaign geography |
 | `location_connections` | Non-hierarchical routes and relationships |
 | `manors` | Manor-specific economic attributes |

@@ -5427,6 +5427,51 @@
             "type": "integer",
             "minimum": 0.0,
             "title": "Glory Total"
+          },
+          "stats": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FoundryStatSnapshot"
+                },
+                "type": "array",
+                "maxItems": 5
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stats"
+          },
+          "inventory": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FoundryInventorySnapshot"
+                },
+                "type": "array",
+                "maxItems": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inventory"
+          },
+          "horses": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FoundryHorseSnapshot"
+                },
+                "type": "array",
+                "maxItems": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Horses"
           }
         },
         "type": "object",
@@ -5475,6 +5520,36 @@
             "type": "integer",
             "title": "Glory Adjustment"
           },
+          "stat_entries_added": {
+            "type": "integer",
+            "title": "Stat Entries Added",
+            "default": 0
+          },
+          "inventory_items_created": {
+            "type": "integer",
+            "title": "Inventory Items Created",
+            "default": 0
+          },
+          "inventory_entries_added": {
+            "type": "integer",
+            "title": "Inventory Entries Added",
+            "default": 0
+          },
+          "horses_created": {
+            "type": "integer",
+            "title": "Horses Created",
+            "default": 0
+          },
+          "horse_entries_added": {
+            "type": "integer",
+            "title": "Horse Entries Added",
+            "default": 0
+          },
+          "ownership_changes": {
+            "type": "integer",
+            "title": "Ownership Changes",
+            "default": 0
+          },
           "changed": {
             "type": "boolean",
             "title": "Changed"
@@ -5492,6 +5567,285 @@
           "changed"
         ],
         "title": "FoundryCharacterSyncResult"
+      },
+      "FoundryHorseSnapshot": {
+        "properties": {
+          "source_key": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Source Key"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "breed": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Breed"
+          },
+          "colour": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Colour"
+          },
+          "personality": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Personality"
+          },
+          "features": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Features"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "siz": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Siz",
+            "default": 0
+          },
+          "dex": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Dex",
+            "default": 0
+          },
+          "str": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Str",
+            "default": 0
+          },
+          "con": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Con",
+            "default": 0
+          },
+          "hp": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Hp",
+            "default": 0
+          },
+          "max_hp": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Max Hp",
+            "default": 0
+          },
+          "move": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Move",
+            "default": 0
+          },
+          "armour": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Armour",
+            "default": 0
+          },
+          "horse_armour": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Horse Armour",
+            "default": 0
+          },
+          "age": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Age",
+            "default": 0
+          },
+          "equipped": {
+            "type": "boolean",
+            "title": "Equipped",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_key",
+          "name"
+        ],
+        "title": "FoundryHorseSnapshot"
+      },
+      "FoundryInventorySnapshot": {
+        "properties": {
+          "source_key": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Source Key"
+          },
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "gear",
+              "weapon",
+              "armour"
+            ],
+            "title": "Item Type"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Quantity",
+            "default": 1
+          },
+          "equipped": {
+            "type": "boolean",
+            "title": "Equipped",
+            "default": false
+          },
+          "libra": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Libra",
+            "default": 0
+          },
+          "denarii": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Denarii",
+            "default": 0
+          },
+          "skill": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skill"
+          },
+          "damage_formula": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Damage Formula"
+          },
+          "weapon_range": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weapon Range"
+          },
+          "mounted_use": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mounted Use"
+          },
+          "melee": {
+            "type": "boolean",
+            "title": "Melee",
+            "default": true
+          },
+          "armour_points": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Armour Points",
+            "default": 0
+          },
+          "material": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Material"
+          },
+          "is_shield": {
+            "type": "boolean",
+            "title": "Is Shield",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_key",
+          "item_type",
+          "name"
+        ],
+        "title": "FoundryInventorySnapshot"
       },
       "FoundryPassionSnapshot": {
         "properties": {
@@ -5567,6 +5921,32 @@
           "value"
         ],
         "title": "FoundrySkillSnapshot"
+      },
+      "FoundryStatSnapshot": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "siz",
+              "dex",
+              "str",
+              "con",
+              "app"
+            ],
+            "title": "Code"
+          },
+          "value": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "value"
+        ],
+        "title": "FoundryStatSnapshot"
       },
       "FoundryTraitSnapshot": {
         "properties": {
