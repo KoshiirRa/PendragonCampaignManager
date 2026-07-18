@@ -1,4 +1,4 @@
-# Foundation ER diagram
+# Campaign database ER diagram
 
 ```mermaid
 erDiagram
@@ -46,9 +46,6 @@ erDiagram
     CHARACTERS ||--o{ CHARACTER_PARENTAGE : child
     CHARACTERS ||--o{ FAMILY_MEMBERSHIPS : member
     FAMILIES ||--o{ FAMILY_MEMBERSHIPS : contains
-    CHARACTERS ||--o{ MARRIAGES : spouse
-    CHARACTERS ||--o{ INHERITANCE_CASES : decedent
-    INHERITANCE_CASES ||--o{ INHERITANCE_HEIRS : candidates
     CHARACTERS ||--o{ CHARACTER_HISTORY_ENTRIES : records
     EVENTS ||--o{ CHARACTER_HISTORY_ENTRIES : backs
     WINTER_PHASES ||--o{ WINTER_PHASE_PARTICIPANTS : includes

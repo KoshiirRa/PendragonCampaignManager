@@ -1,4 +1,4 @@
-# Schema: foundation slice
+# Relational schema
 
 ## Design decisions
 
@@ -11,7 +11,7 @@
 - Dice rolls preserve the expression, individual dice, modifier, total, target, and interpreted outcome.
 - Pendragon dates can be narratively uncertain, so `in_game_year` is sortable while `in_game_date` preserves human-readable detail.
 
-## Current tables
+## Campaign foundation
 
 | Table | Purpose |
 |---|---|
@@ -100,6 +100,22 @@ Manor identity and tenure remain in `manors` and `manor_tenures`. `manor_annual_
 ## Squires and knightly service
 
 Every synchronized squire is both a normal NPC `character` and a stable `squires` identity. `squire_service_history` records effective-dated service to a knight independently of the squire's personal state, so transfer or departure closes service without deleting the person. `squire_state_ledger` appends age, Squire Skill, knight modifier, Glory, category, Description, and GM Info only when those values change. Foundry PID keys are preferred over embedded Item UUIDs so a transferred squire can retain identity when the source system preserves its PID.
+
+| Table | Purpose |
+|---|---|
+| `character_history_entries` | Event-backed Foundry history records |
+| `winter_phases` | One annual Winter Phase per campaign and year |
+| `winter_phase_participants` | Character participation in an annual phase |
+| `character_wound_ledger` | Append-only wound state |
+| `manor_annual_resolutions` | Annual estate outcome and accounting provenance |
+| `manor_treasury_ledger` | Append-only estate income and expense entries |
+| `manor_assets` | Stable livestock, resource, investment, and feature identities |
+| `manor_asset_ledger` | Append-only asset quantity and condition state |
+| `household_employment_history` | Effective-dated household service |
+| `manor_defense_layers` | Ordered estate defenses and Defensive Values |
+| `squires` | Stable squire identity linked to an NPC character |
+| `squire_service_history` | Effective-dated service to a knight |
+| `squire_state_ledger` | Append-only squire development state |
 
 Inheritance is represented as a case with candidate heirs and explicit asset transfers. Recording an inherited manor closes its current tenure and opens the beneficiary's tenure in the same database transaction, linked to the transfer event.
 

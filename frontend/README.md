@@ -14,10 +14,10 @@ than modifying the source cartography or presenting its later political labels a
 The campaign-approved national player map is integrated as a circa-510 kingdom overview with
 Salisbury as the transition point into the detailed county map.
 
-The Families and Places & Manors sections use representative records to prototype lineage trees,
-inheritance context, holdings, household summaries, estate history, and map-linked manor browsing.
-Manor records separately present improvements, special features, and defensive layers so the UI can
-be evaluated before the final special-feature persistence model is designed.
+The Families and Places & Manors sections render the player-safe projection's lineage,
+inheritance context, holdings, estate history, and map-linked manor data. Manor records present
+persisted improvements, special-feature assets, and defensive layers separately. The embedded
+representative dataset is displayed only if the live API request fails.
 
 ## Local development
 
