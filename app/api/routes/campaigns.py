@@ -12,9 +12,24 @@ from app.schemas import (
     SessionRead,
     SessionUpdate,
 )
+from app.schemas.player_view import CampaignPlayerView
 from app.services import campaigns as service
+from app.services.player_view import get_player_view as build_player_view
+from app.services.player_view import get_player_view_by_slug as build_player_view_by_slug
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
+
+
+@router.get("/by-slug/{slug}/player-view", response_model=CampaignPlayerView, tags=["player-view"])
+async def get_player_view_by_slug(slug: str, db: DB):
+    """Return a player-safe projection selected by its URL-safe campaign slug."""
+    return await build_player_view_by_slug(db, slug)
+
+
+@router.get("/{campaign_id}/player-view", response_model=CampaignPlayerView, tags=["player-view"])
+async def get_player_view(campaign_id: UUID, db: DB):
+    """Return a player-safe projection for the human-readable campaign site."""
+    return await build_player_view(db, campaign_id)
 
 
 @router.get("", response_model=list[CampaignRead])

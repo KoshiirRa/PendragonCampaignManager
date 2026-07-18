@@ -5,6 +5,8 @@ def test_openapi_contains_foundation_routes() -> None:
     paths = app.openapi()["paths"]
     assert "/api/v1/campaigns" in paths
     assert "/api/v1/campaigns/{campaign_id}/sessions" in paths
+    assert "/api/v1/campaigns/{campaign_id}/player-view" in paths
+    assert "/api/v1/campaigns/by-slug/{slug}/player-view" in paths
     assert "/api/v1/campaigns/{campaign_id}/events" in paths
     assert "/api/v1/campaigns/{campaign_id}/dice-logs" in paths
     assert "/api/v1/campaigns/{campaign_id}/characters" in paths

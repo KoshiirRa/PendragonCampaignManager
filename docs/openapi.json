@@ -12,6 +12,95 @@
     }
   ],
   "paths": {
+    "/api/v1/campaigns/by-slug/{slug}/player-view": {
+      "get": {
+        "tags": [
+          "campaigns",
+          "player-view"
+        ],
+        "summary": "Get Player View By Slug",
+        "description": "Return a player-safe projection selected by its URL-safe campaign slug.",
+        "operationId": "get_player_view_by_slug",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampaignPlayerView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaigns/{campaign_id}/player-view": {
+      "get": {
+        "tags": [
+          "campaigns",
+          "player-view"
+        ],
+        "summary": "Get Player View",
+        "description": "Return a player-safe projection for the human-readable campaign site.",
+        "operationId": "get_player_view",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Campaign Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampaignPlayerView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/campaigns": {
       "get": {
         "tags": [
@@ -4420,6 +4509,54 @@
           "slug"
         ],
         "title": "CampaignCreate"
+      },
+      "CampaignPlayerView": {
+        "properties": {
+          "campaign_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campaign Id"
+          },
+          "campaign_name": {
+            "type": "string",
+            "title": "Campaign Name"
+          },
+          "current_year": {
+            "type": "integer",
+            "title": "Current Year"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/PlayerEvent"
+            },
+            "type": "array",
+            "title": "Events"
+          },
+          "families": {
+            "items": {
+              "$ref": "#/components/schemas/PlayerFamily"
+            },
+            "type": "array",
+            "title": "Families"
+          },
+          "manors": {
+            "items": {
+              "$ref": "#/components/schemas/PlayerManor"
+            },
+            "type": "array",
+            "title": "Manors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "campaign_id",
+          "campaign_name",
+          "current_year",
+          "events",
+          "families",
+          "manors"
+        ],
+        "title": "CampaignPlayerView"
       },
       "CampaignRead": {
         "properties": {
@@ -11199,6 +11336,369 @@
           "created_at"
         ],
         "title": "PassionRead"
+      },
+      "PlayerEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "year": {
+            "type": "integer",
+            "title": "Year"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "event_type": {
+            "type": "string",
+            "title": "Event Type"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "year",
+          "date",
+          "event_type",
+          "title",
+          "description"
+        ],
+        "title": "PlayerEvent"
+      },
+      "PlayerFamily": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "founding_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Founding Year"
+          },
+          "culture": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Culture"
+          },
+          "coat_of_arms": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coat Of Arms"
+          },
+          "motto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motto"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "origin_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Location"
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/PlayerFamilyMember"
+            },
+            "type": "array",
+            "title": "Members"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "founding_year",
+          "culture",
+          "coat_of_arms",
+          "motto",
+          "notes",
+          "origin_location",
+          "members"
+        ],
+        "title": "PlayerFamily"
+      },
+      "PlayerFamilyMember": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "membership_type": {
+            "type": "string",
+            "title": "Membership Type"
+          },
+          "start_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Year"
+          },
+          "end_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Year"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "membership_type",
+          "start_year",
+          "end_year"
+        ],
+        "title": "PlayerFamilyMember"
+      },
+      "PlayerManor": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "holder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Holder"
+          },
+          "customary_income": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customary Income"
+          },
+          "population": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Population"
+          },
+          "base_defensive_value": {
+            "type": "integer",
+            "title": "Base Defensive Value"
+          },
+          "improvements": {
+            "items": {
+              "$ref": "#/components/schemas/PlayerManorItem"
+            },
+            "type": "array",
+            "title": "Improvements"
+          },
+          "special_features": {
+            "items": {
+              "$ref": "#/components/schemas/PlayerManorItem"
+            },
+            "type": "array",
+            "title": "Special Features"
+          },
+          "defenses": {
+            "items": {
+              "$ref": "#/components/schemas/PlayerManorDefense"
+            },
+            "type": "array",
+            "title": "Defenses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "holder",
+          "customary_income",
+          "population",
+          "base_defensive_value",
+          "improvements",
+          "special_features",
+          "defenses"
+        ],
+        "title": "PlayerManor"
+      },
+      "PlayerManorDefense": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "defensive_value": {
+            "type": "integer",
+            "title": "Defensive Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "defensive_value"
+        ],
+        "title": "PlayerManorDefense"
+      },
+      "PlayerManorItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description"
+        ],
+        "title": "PlayerManorItem"
       },
       "SessionCreate": {
         "properties": {
