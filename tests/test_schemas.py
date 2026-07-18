@@ -4,9 +4,15 @@ import pytest
 from pydantic import ValidationError
 
 from app.schemas import CampaignCreate, SessionCreate
-from app.schemas.character import CharacterCreate, FoundryCharacterSnapshot, GloryCreate
+from app.schemas.character import (
+    CharacterCreate,
+    FoundryCharacterSnapshot,
+    FoundryRelativeSnapshot,
+    GloryCreate,
+)
 from app.schemas.family import FamilyHistoryCreate, MarriageCreate
 from app.schemas.location import ManorCreate
+from app.services.characters import _inheritance_case_key
 
 
 def test_campaign_slug_is_url_safe() -> None:
@@ -108,3 +114,13 @@ def test_marriage_requires_distinct_spouses() -> None:
     character_id = uuid4()
     with pytest.raises(ValidationError):
         MarriageCreate(spouse_one_id=character_id, spouse_two_id=character_id, start_year=480)
+
+
+def test_inheritance_requires_heir_and_deceased_parent() -> None:
+    living_parent = FoundryRelativeSnapshot(
+        source_key="Actor.test.Item.parent", name="Parent", relation="parent"
+    )
+    deceased_parent = living_parent.model_copy(update={"death_year": 485})
+    assert _inheritance_case_key(living_parent, True) is None
+    assert _inheritance_case_key(deceased_parent, False) is None
+    assert _inheritance_case_key(deceased_parent, True) == "Actor.test.Item.parent:inheritance"

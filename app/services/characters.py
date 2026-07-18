@@ -674,6 +674,31 @@ async def sync_foundry_snapshot(
                 ownership_pending.append((new_ownership, "start"))
                 ownership_by_horse[horse.id] = new_ownership
                 ownership_changes += 1
+            previous = latest_horse_stats.get(horse.id)
+            if previous and all(
+                getattr(previous, field) == getattr(snapshot, field) for field in horse_fields
+            ):
+                continue
+            pending.append(
+                HorseStatLedger(
+                    campaign_id=campaign_id,
+                    horse_id=horse.id,
+                    effective_year=data.effective_year,
+                    reason=reason,
+                    **{field: getattr(snapshot, field) for field in horse_fields},
+                )
+            )
+            horse_added += 1
+        for horse in horses:
+            ownership = ownership_by_horse.get(horse.id)
+            if (
+                horse.source_key not in incoming_keys
+                and ownership
+                and ownership.character_id == character_id
+            ):
+                ownership.end_year = data.effective_year
+                ownership_pending.append((ownership, "end"))
+                ownership_changes += 1
 
     relatives_created = 0
     family_links_created = 0
@@ -865,8 +890,8 @@ async def sync_foundry_snapshot(
                 family_event_fields.append((marriage, "start_event_id"))
                 relationships_created += 1
 
-            if data.is_heir and snapshot.relation == "parent" and snapshot.death_year:
-                case_key = f"{snapshot.source_key}:inheritance"
+            case_key = _inheritance_case_key(snapshot, data.is_heir)
+            if case_key:
                 inheritance = existing_cases.get(case_key)
                 if inheritance is None:
                     inheritance = InheritanceCase(
@@ -881,6 +906,21 @@ async def sync_foundry_snapshot(
                     await db.flush()
                     family_event_fields.append((inheritance, "opened_event_id"))
                     existing_cases[case_key] = inheritance
+                    inheritance_records_created += 1
+                heir_key = f"{case_key}:heir:{character.foundry_uuid}"
+                if heir_key not in existing_heirs:
+                    db.add(
+                        InheritanceHeir(
+                            campaign_id=campaign_id,
+                            source_key=heir_key,
+                            inheritance_case_id=inheritance.id,
+                            character_id=character_id,
+                            priority=1,
+                            relationship_description="child",
+                            claim_status="designated",
+                            designated=True,
+                        )
+                    )
                     inheritance_records_created += 1
 
         relative_ids = [item.id for item in relative_by_source.values()]
@@ -911,46 +951,6 @@ async def sync_foundry_snapshot(
                         scope=KnowledgeScope.PLAYERS,
                     )
                 )
-                heir_key = f"{case_key}:heir:{character.foundry_uuid}"
-                if heir_key not in existing_heirs:
-                    db.add(
-                        InheritanceHeir(
-                            campaign_id=campaign_id,
-                            source_key=heir_key,
-                            inheritance_case_id=inheritance.id,
-                            character_id=character_id,
-                            priority=1,
-                            relationship_description="child",
-                            claim_status="designated",
-                            designated=True,
-                        )
-                    )
-                    inheritance_records_created += 1
-            previous = latest_horse_stats.get(horse.id)
-            if previous and all(
-                getattr(previous, field) == getattr(snapshot, field) for field in horse_fields
-            ):
-                continue
-            pending.append(
-                HorseStatLedger(
-                    campaign_id=campaign_id,
-                    horse_id=horse.id,
-                    effective_year=data.effective_year,
-                    reason=reason,
-                    **{field: getattr(snapshot, field) for field in horse_fields},
-                )
-            )
-            horse_added += 1
-        for horse in horses:
-            ownership = ownership_by_horse.get(horse.id)
-            if (
-                horse.source_key not in incoming_keys
-                and ownership
-                and ownership.character_id == character_id
-            ):
-                ownership.end_year = data.effective_year
-                ownership_pending.append((ownership, "end"))
-                ownership_changes += 1
 
     event = None
     family_changed = bool(
@@ -1038,3 +1038,9 @@ async def _latest_by_key(db: AsyncSession, model: type[Any], key: Any, condition
     for row in rows:
         latest.setdefault(getattr(row, key.key), row)
     return latest
+
+
+def _inheritance_case_key(snapshot: Any, is_heir: bool) -> str | None:
+    if is_heir and snapshot.relation == "parent" and snapshot.death_year:
+        return f"{snapshot.source_key}:inheritance"
+    return None
