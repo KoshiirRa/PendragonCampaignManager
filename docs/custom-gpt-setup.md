@@ -19,7 +19,7 @@ This is a server-to-server connection. Browser CORS settings for the Foundry VTT
 ## Required values
 
 - API server: `https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app`
-- OpenAPI schema: `https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi.json`
+- Campaign Play OpenAPI schema: `https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi-gpt-play.json`
 - Authentication header: `X-API-Key`
 - Authentication value: the latest enabled version of the `pendragon-api-key` Google Cloud secret
 
@@ -44,10 +44,12 @@ Do not send the value in chat or paste it into any GPT text field.
 5. Enter the OpenAPI schema URL:
 
    ```text
-   https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi.json
+   https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi-gpt-play.json
    ```
 
-6. Confirm that the editor detects the API operations without schema errors.
+6. Confirm that the editor detects 30 API operations without schema errors. The focused Campaign
+   Play schema intentionally excludes destructive operations and specialist Dynasty, Estate, and
+   Winter Phase workflows. The complete developer schema remains available at `/openapi.json`.
 7. Open the Action's **Authentication** settings.
 8. Select **API Key** authentication.
 9. Select the custom-header option.
@@ -132,7 +134,8 @@ Check [API readiness](https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/rea
 
 ## Related documentation
 
-- [Live OpenAPI schema](https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi.json)
+- [Live Campaign Play schema](https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi-gpt-play.json)
+- [Complete developer schema](https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi.json)
 - [Versioned OpenAPI snapshot](openapi.json)
 - [ChatGPT Actions operating guide](chatgpt-actions.md)
 - [API notes](api.md)

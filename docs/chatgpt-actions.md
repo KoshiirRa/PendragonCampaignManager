@@ -6,13 +6,17 @@ For step-by-step configuration in the Custom GPT editor, see [Connect a Custom G
 
 ## Action configuration
 
-- OpenAPI URL: `https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi.json`
+- Campaign Play OpenAPI URL: `https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi-gpt-play.json`
 - Authentication type: API key
 - Authentication location: custom header
 - Header name: `X-API-Key`
 - Store the key in the GPT Action authentication settings. Never place it in GPT instructions, knowledge files, URLs, or conversation messages.
 
 The API key grants GM-level access to the current deployment. Do not expose `gm_only` material when responding in a player-facing context.
+
+The Campaign Play schema contains exactly 30 operations for ordinary sessions. Dynasty, Estate,
+and Winter Phase operations remain available in the complete developer API and will be exposed
+through separate focused Actions rather than overloading one GPT toolset.
 
 ## Core operating rules
 
@@ -69,7 +73,8 @@ The API key grants GM-level access to the current deployment. Do not expose `gm_
 
 ## Sources of truth
 
-- Live machine-readable schema: `/openapi.json`
+- Campaign Play Action schema: `/openapi-gpt-play.json`
+- Complete machine-readable developer schema: `/openapi.json`
 - Versioned schema snapshot: `docs/openapi.json`
 - Domain design and table semantics: `docs/schema.md`
 - ER relationships: `docs/er-diagram.md`

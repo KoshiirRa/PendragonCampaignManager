@@ -1,4 +1,7 @@
+from fastapi.testclient import TestClient
+
 from app.main import app
+from app.openapi import GPT_PLAY_OPERATION_IDS, build_gpt_play_openapi
 
 
 def test_openapi_contains_foundation_routes() -> None:
@@ -75,3 +78,32 @@ def test_openapi_is_ready_for_chatgpt_actions() -> None:
     assert len(operation_ids) == len(set(operation_ids))
     assert schema["servers"][0]["url"]
     assert schema["x-chatgpt-instructions"]["rules"]
+
+
+def test_gpt_play_openapi_has_exactly_thirty_focused_operations() -> None:
+    schema = build_gpt_play_openapi(app)
+    operation_ids = {
+        operation["operationId"] for path in schema["paths"].values() for operation in path.values()
+    }
+    assert operation_ids == GPT_PLAY_OPERATION_IDS
+    assert len(operation_ids) == 30
+    assert schema["info"]["title"] == "Pendragon Campaign Play Action"
+    assert schema["x-chatgpt-instructions"]["action_scope"] == "campaign-play"
+
+
+def test_gpt_play_openapi_omits_destructive_and_specialist_operations() -> None:
+    schema = build_gpt_play_openapi(app)
+    operation_ids = {
+        operation["operationId"] for path in schema["paths"].values() for operation in path.values()
+    }
+    assert "archive_campaign" not in operation_ids
+    assert "archive_character" not in operation_ids
+    assert "create_winter_phase" not in operation_ids
+    assert "create_inheritance_case" not in operation_ids
+    assert "create_annual_resolution" not in operation_ids
+
+
+def test_gpt_play_openapi_endpoint_is_public() -> None:
+    response = TestClient(app).get("/openapi-gpt-play.json")
+    assert response.status_code == 200
+    assert response.json()["info"]["title"] == "Pendragon Campaign Play Action"

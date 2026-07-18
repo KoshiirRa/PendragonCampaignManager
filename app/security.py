@@ -6,7 +6,9 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.types import ASGIApp
 
-PUBLIC_PATHS = frozenset({"/health", "/ready", "/docs", "/redoc", "/openapi.json"})
+PUBLIC_PATHS = frozenset(
+    {"/health", "/ready", "/docs", "/redoc", "/openapi.json", "/openapi-gpt-play.json"}
+)
 
 
 def api_keys_match(expected: SecretStr | None, provided: str | None) -> bool:

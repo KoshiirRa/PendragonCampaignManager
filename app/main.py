@@ -17,7 +17,7 @@ from app.api.routes import (
 )
 from app.config import settings
 from app.database import engine
-from app.openapi import build_openapi
+from app.openapi import build_gpt_play_openapi, build_openapi
 from app.security import APIKeyMiddleware
 
 
@@ -69,6 +69,11 @@ async def ready() -> Response:
             content={"status": "unavailable"},
         )
     return JSONResponse(content={"status": "ready"})
+
+
+@app.get("/openapi-gpt-play.json", include_in_schema=False)
+async def openapi_gpt_play() -> JSONResponse:
+    return JSONResponse(content=build_gpt_play_openapi(app))
 
 
 app.openapi = lambda: build_openapi(app)
