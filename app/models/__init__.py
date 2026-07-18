@@ -54,6 +54,7 @@ from app.models.possession import (
     InventoryItem,
     WeaponProfile,
 )
+from app.models.squire import Squire, SquireServiceHistory, SquireStateLedger
 from app.models.winter import (
     CharacterHistoryEntry,
     CharacterWoundLedger,
@@ -110,6 +111,9 @@ __all__ = [
     "CharacterWoundLedger",
     "WinterPhase",
     "WinterPhaseParticipant",
+    "Squire",
+    "SquireServiceHistory",
+    "SquireStateLedger",
     "HouseholdEmployment",
     "ManorAnnualResolution",
     "ManorAsset",

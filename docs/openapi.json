@@ -1670,6 +1670,167 @@
         }
       }
     },
+    "/api/v1/campaigns/{campaign_id}/characters/{character_id}/squire-services": {
+      "get": {
+        "tags": [
+          "characters"
+        ],
+        "summary": "List Squire Services",
+        "operationId": "list_squire_services",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Campaign Id"
+            }
+          },
+          {
+            "name": "character_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Character Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SquireServiceRead"
+                  },
+                  "title": "Response List Squire Services"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaigns/{campaign_id}/squires": {
+      "get": {
+        "tags": [
+          "characters"
+        ],
+        "summary": "List Squires",
+        "operationId": "list_squires",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Campaign Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SquireRead"
+                  },
+                  "title": "Response List Squires"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaigns/{campaign_id}/squires/{squire_id}/states": {
+      "get": {
+        "tags": [
+          "characters"
+        ],
+        "summary": "List Squire States",
+        "operationId": "list_squire_states",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Campaign Id"
+            }
+          },
+          {
+            "name": "squire_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Squire Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SquireStateRead"
+                  },
+                  "title": "Response List Squire States"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/campaigns/{campaign_id}/characters/{character_id}/foundry-snapshot": {
       "post": {
         "tags": [
@@ -7022,6 +7183,21 @@
               }
             ],
             "title": "Wounds"
+          },
+          "squires": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FoundrySquireSnapshot"
+                },
+                "type": "array",
+                "maxItems": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Squires"
           }
         },
         "type": "object",
@@ -7138,6 +7314,21 @@
           "wound_entries_added": {
             "type": "integer",
             "title": "Wound Entries Added",
+            "default": 0
+          },
+          "squires_created": {
+            "type": "integer",
+            "title": "Squires Created",
+            "default": 0
+          },
+          "squire_state_entries_added": {
+            "type": "integer",
+            "title": "Squire State Entries Added",
+            "default": 0
+          },
+          "squire_service_changes": {
+            "type": "integer",
+            "title": "Squire Service Changes",
             "default": 0
           },
           "changed": {
@@ -7692,6 +7883,85 @@
           "value"
         ],
         "title": "FoundrySkillSnapshot"
+      },
+      "FoundrySquireSnapshot": {
+        "properties": {
+          "source_key": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Source Key"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "age": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Age",
+            "default": 14
+          },
+          "skill": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Skill",
+            "default": 15
+          },
+          "knight_modifier": {
+            "type": "integer",
+            "title": "Knight Modifier",
+            "default": 0
+          },
+          "glory": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Glory",
+            "default": 0
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "gm_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gm Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_key",
+          "name"
+        ],
+        "title": "FoundrySquireSnapshot"
       },
       "FoundryStatSnapshot": {
         "properties": {
@@ -11570,6 +11840,252 @@
           "created_at"
         ],
         "title": "SourceReferenceRead"
+      },
+      "SquireRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "campaign_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campaign Id"
+          },
+          "character_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Character Id"
+          },
+          "source_key": {
+            "type": "string",
+            "title": "Source Key"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "campaign_id",
+          "character_id",
+          "source_key",
+          "created_at"
+        ],
+        "title": "SquireRead"
+      },
+      "SquireServiceRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "campaign_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campaign Id"
+          },
+          "squire_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Squire Id"
+          },
+          "knight_character_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Knight Character Id"
+          },
+          "source_key": {
+            "type": "string",
+            "title": "Source Key"
+          },
+          "start_year": {
+            "type": "integer",
+            "title": "Start Year"
+          },
+          "end_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Year"
+          },
+          "start_event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Event Id"
+          },
+          "end_event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Event Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "campaign_id",
+          "squire_id",
+          "knight_character_id",
+          "source_key",
+          "start_year",
+          "end_year",
+          "start_event_id",
+          "end_event_id",
+          "created_at"
+        ],
+        "title": "SquireServiceRead"
+      },
+      "SquireStateRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "campaign_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campaign Id"
+          },
+          "squire_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Squire Id"
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Id"
+          },
+          "effective_year": {
+            "type": "integer",
+            "title": "Effective Year"
+          },
+          "sequence": {
+            "type": "integer",
+            "title": "Sequence"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "age": {
+            "type": "integer",
+            "title": "Age"
+          },
+          "skill": {
+            "type": "integer",
+            "title": "Skill"
+          },
+          "knight_modifier": {
+            "type": "integer",
+            "title": "Knight Modifier"
+          },
+          "glory": {
+            "type": "integer",
+            "title": "Glory"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "gm_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gm Description"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Recorded At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "campaign_id",
+          "squire_id",
+          "event_id",
+          "effective_year",
+          "sequence",
+          "category",
+          "age",
+          "skill",
+          "knight_modifier",
+          "glory",
+          "description",
+          "gm_description",
+          "reason",
+          "recorded_at"
+        ],
+        "title": "SquireStateRead"
       },
       "TraitDefinitionCreate": {
         "properties": {

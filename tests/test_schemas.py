@@ -163,6 +163,26 @@ def test_foundry_snapshot_accepts_history_and_wounds() -> None:
     assert snapshot.wounds[0].treated is True
 
 
+def test_foundry_snapshot_accepts_squires() -> None:
+    snapshot = FoundryCharacterSnapshot(
+        effective_year=486,
+        glory_total=2000,
+        squires=[
+            {
+                "source_key": "i.squire.osric",
+                "name": "Osric",
+                "category": "squire",
+                "age": 16,
+                "skill": 15,
+                "knight_modifier": 2,
+                "glory": 120,
+            }
+        ],
+    )
+    assert snapshot.squires[0].name == "Osric"
+    assert snapshot.squires[0].age == 16
+
+
 def test_manor_resolution_and_treasury_validation() -> None:
     resolution = ManorAnnualResolutionCreate(
         in_game_year=485, roll_result="success", income=2, expenses=1, privy_funds=1

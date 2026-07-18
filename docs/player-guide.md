@@ -63,6 +63,7 @@ The Gamemaster can create and manage a linked knight's manor from the Actor head
 - treasury income and expenses;
 - improvements, investments, resources, and livestock;
 - household professionals and soldiers;
+- squires, their service history, age, Skill, Glory, and development;
 - defenses and Defensive Value.
 
 Players should provide the Gamemaster with the agreed results of rolls and choices. The database records those outcomes; it does not replace table rulings or automatically reproduce sourcebook procedures.

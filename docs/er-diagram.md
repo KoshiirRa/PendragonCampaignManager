@@ -60,6 +60,12 @@ erDiagram
     MANOR_ASSETS ||--o{ MANOR_ASSET_LEDGER : changes
     MANORS ||--o{ HOUSEHOLD_EMPLOYMENT_HISTORY : employs
     MANORS ||--o{ MANOR_DEFENSE_LAYERS : defends
+    CHARACTERS ||--o| SQUIRES : identifies
+    SQUIRES ||--o{ SQUIRE_SERVICE_HISTORY : serves_through
+    CHARACTERS ||--o{ SQUIRE_SERVICE_HISTORY : knights
+    SQUIRES ||--o{ SQUIRE_STATE_LEDGER : develops
+    EVENTS o|--o{ SQUIRE_SERVICE_HISTORY : bounds
+    EVENTS o|--o{ SQUIRE_STATE_LEDGER : records
     CHARACTERS ||--o{ MARRIAGES : spouse
     CHARACTERS ||--o{ INHERITANCE_CASES : decedent
     INHERITANCE_CASES ||--o{ INHERITANCE_HEIRS : considers

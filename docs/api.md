@@ -60,6 +60,10 @@ Create and list annual results at `/manors/{manor_id}/annual-resolutions`; creat
 
 The API stores user-entered outcomes and modifiers rather than copyrighted sourcebook lookup tables. Clients calculate or select the outcome, while the backend validates campaign boundaries and preserves the resulting history.
 
+# Squire service API
+
+The Foundry character snapshot accepts a complete `squires` collection. Each stable source key creates or reuses an NPC identity, opens or closes effective-dated knight service, and appends changed yearly state. Repeating an unchanged snapshot creates no records. Resolve squire records to their NPC characters with `/squires`, list a knight's history at `/characters/{character_id}/squire-services`, and list development at `/squires/{squire_id}/states`.
+
 Ancestral entries use `POST /families/{family_id}/history`. The service creates the central event automatically and can also create a linked Glory ledger entry when `glory_amount` and `ancestor_character_id` are supplied. Use `GET /families/{family_id}/history?before_year=480` for the pre-480 timeline.
 
 Sources are campaign-owned records at `/source-references`; `source_locator` on each history entry can hold a page, table, section, URL, or other user-defined locator.

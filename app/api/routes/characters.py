@@ -25,6 +25,9 @@ from app.schemas.character import (
     SkillDefinitionRead,
     SkillLedgerCreate,
     SkillLedgerRead,
+    SquireRead,
+    SquireServiceRead,
+    SquireStateRead,
     TraitDefinitionCreate,
     TraitDefinitionRead,
     TraitLedgerCreate,
@@ -175,6 +178,21 @@ async def glory_summary(campaign_id: UUID, character_id: UUID, db: DB, include_g
 )
 async def add_glory(campaign_id: UUID, character_id: UUID, data: GloryCreate, db: DB):
     return await service.add_glory(db, campaign_id, character_id, data)
+
+
+@router.get("/characters/{character_id}/squire-services", response_model=list[SquireServiceRead])
+async def list_squire_services(campaign_id: UUID, character_id: UUID, db: DB):
+    return await service.list_squire_services(db, campaign_id, character_id)
+
+
+@router.get("/squires", response_model=list[SquireRead])
+async def list_squires(campaign_id: UUID, db: DB):
+    return await service.list_squires(db, campaign_id)
+
+
+@router.get("/squires/{squire_id}/states", response_model=list[SquireStateRead])
+async def list_squire_states(campaign_id: UUID, squire_id: UUID, db: DB):
+    return await service.list_squire_states(db, campaign_id, squire_id)
 
 
 @router.post(

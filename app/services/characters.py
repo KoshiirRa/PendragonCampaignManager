@@ -12,6 +12,7 @@ from app.models import (
     Character,
     CharacterHistoryEntry,
     CharacterInventoryLedger,
+    CharacterKind,
     CharacterNote,
     CharacterParentage,
     CharacterPassion,
@@ -37,6 +38,9 @@ from app.models import (
     KnowledgeScope,
     Marriage,
     SkillDefinition,
+    Squire,
+    SquireServiceHistory,
+    SquireStateLedger,
     TraitDefinition,
     WeaponProfile,
     WinterPhase,
@@ -325,6 +329,41 @@ async def glory_summary(
         select(func.coalesce(func.sum(GloryLedger.amount), 0)).where(*condition)
     )
     return entries, int(total or 0)
+
+
+async def list_squire_services(db, campaign_id, character_id):
+    await get_character(db, campaign_id, character_id)
+    return list(
+        await db.scalars(
+            select(SquireServiceHistory)
+            .where(SquireServiceHistory.knight_character_id == character_id)
+            .order_by(SquireServiceHistory.start_year, SquireServiceHistory.created_at)
+        )
+    )
+
+
+async def list_squires(db, campaign_id):
+    await get_campaign(db, campaign_id)
+    return list(
+        await db.scalars(
+            select(Squire).where(Squire.campaign_id == campaign_id).order_by(Squire.created_at)
+        )
+    )
+
+
+async def list_squire_states(db, campaign_id, squire_id):
+    await _campaign_item(db, Squire, squire_id, campaign_id, "Squire")
+    return list(
+        await db.scalars(
+            select(SquireStateLedger)
+            .where(SquireStateLedger.squire_id == squire_id)
+            .order_by(
+                SquireStateLedger.effective_year,
+                SquireStateLedger.sequence,
+                SquireStateLedger.recorded_at,
+            )
+        )
+    )
 
 
 async def sync_foundry_snapshot(
@@ -1155,6 +1194,131 @@ async def sync_foundry_snapshot(
             )
             wound_entries_added += 1
 
+    squires_created = 0
+    squire_state_added = 0
+    squire_service_changes = 0
+    squire_service_pending: list[tuple[SquireServiceHistory, str]] = []
+    if data.squires is not None:
+        squires = list(await db.scalars(select(Squire).where(Squire.campaign_id == campaign_id)))
+        squire_by_source = {item.source_key: item for item in squires}
+        open_services = list(
+            await db.scalars(
+                select(SquireServiceHistory).where(
+                    SquireServiceHistory.campaign_id == campaign_id,
+                    SquireServiceHistory.end_year.is_(None),
+                )
+            )
+        )
+        service_by_squire = {item.squire_id: item for item in open_services}
+        latest_squire_states = (
+            await _latest_by_key(
+                db,
+                SquireStateLedger,
+                SquireStateLedger.squire_id,
+                SquireStateLedger.squire_id.in_([item.id for item in squires]),
+            )
+            if squires
+            else {}
+        )
+        incoming_keys = {snapshot.source_key for snapshot in data.squires}
+        for snapshot in data.squires:
+            squire = squire_by_source.get(snapshot.source_key)
+            if squire is None:
+                person = Character(
+                    campaign_id=campaign_id,
+                    kind=CharacterKind.NPC,
+                    name=snapshot.name,
+                    public_description=snapshot.description,
+                    metadata_={
+                        "source": "foundry_squire",
+                        "foundry_item_key": snapshot.source_key,
+                    },
+                )
+                db.add(person)
+                await db.flush()
+                squire = Squire(
+                    campaign_id=campaign_id,
+                    character_id=person.id,
+                    source_key=snapshot.source_key,
+                )
+                db.add(squire)
+                await db.flush()
+                squire_by_source[snapshot.source_key] = squire
+                squires_created += 1
+            else:
+                person = await db.get(Character, squire.character_id)
+                if person is not None:
+                    person.name = snapshot.name
+                    person.public_description = snapshot.description
+            service = service_by_squire.get(squire.id)
+            if service is None or service.knight_character_id != character_id:
+                if service is not None:
+                    service.end_year = data.effective_year
+                    squire_service_pending.append((service, "end"))
+                    await db.flush()
+                service = SquireServiceHistory(
+                    campaign_id=campaign_id,
+                    squire_id=squire.id,
+                    knight_character_id=character_id,
+                    source_key=snapshot.source_key,
+                    start_year=data.effective_year,
+                )
+                db.add(service)
+                service_by_squire[squire.id] = service
+                squire_service_pending.append((service, "start"))
+                squire_service_changes += 1
+            previous = latest_squire_states.get(squire.id)
+            state = (
+                snapshot.category,
+                snapshot.age,
+                snapshot.skill,
+                snapshot.knight_modifier,
+                snapshot.glory,
+                snapshot.description,
+                snapshot.gm_description,
+            )
+            if (
+                previous
+                and (
+                    previous.category,
+                    previous.age,
+                    previous.skill,
+                    previous.knight_modifier,
+                    previous.glory,
+                    previous.description,
+                    previous.gm_description,
+                )
+                == state
+            ):
+                continue
+            pending.append(
+                SquireStateLedger(
+                    campaign_id=campaign_id,
+                    squire_id=squire.id,
+                    effective_year=data.effective_year,
+                    category=snapshot.category,
+                    age=snapshot.age,
+                    skill=snapshot.skill,
+                    knight_modifier=snapshot.knight_modifier,
+                    glory=snapshot.glory,
+                    description=snapshot.description,
+                    gm_description=snapshot.gm_description,
+                    reason=reason,
+                )
+            )
+            squire_state_added += 1
+        for squire in squires:
+            service = service_by_squire.get(squire.id)
+            if (
+                squire.source_key not in incoming_keys
+                and service is not None
+                and service.knight_character_id == character_id
+                and service.end_year is None
+            ):
+                service.end_year = data.effective_year
+                squire_service_pending.append((service, "end"))
+                squire_service_changes += 1
+
     event = None
     family_changed = bool(
         relatives_created
@@ -1164,7 +1328,13 @@ async def sync_foundry_snapshot(
         or inheritance_records_created
     )
     domain_changed = bool(history_entries_created or winter_records_created)
-    if pending or ownership_pending or family_event_fields or family_changed:
+    if (
+        pending
+        or ownership_pending
+        or family_event_fields
+        or family_changed
+        or squire_service_pending
+    ):
         event = Event(
             campaign_id=campaign_id,
             event_type="foundry_character_sync",
@@ -1189,6 +1359,11 @@ async def sync_foundry_snapshot(
                 ownership.end_event_id = event.id
         for item, field in family_event_fields:
             setattr(item, field, event.id)
+        for service, boundary in squire_service_pending:
+            if boundary == "start":
+                service.start_event_id = event.id
+            else:
+                service.end_event_id = event.id
         for item in pending:
             if hasattr(item, "event_id"):
                 item.event_id = event.id
@@ -1226,8 +1401,16 @@ async def sync_foundry_snapshot(
         history_entries_created=history_entries_created,
         winter_records_created=winter_records_created,
         wound_entries_added=wound_entries_added,
+        squires_created=squires_created,
+        squire_state_entries_added=squire_state_added,
+        squire_service_changes=squire_service_changes,
         changed=bool(
-            pending or ownership_pending or family_event_fields or family_changed or domain_changed
+            pending
+            or ownership_pending
+            or family_event_fields
+            or family_changed
+            or domain_changed
+            or squire_service_pending
         ),
     )
 

@@ -318,6 +318,57 @@ class FoundryWoundSnapshot(ORMModel):
     description: str | None = None
 
 
+class FoundrySquireSnapshot(ORMModel):
+    source_key: str = Field(min_length=1, max_length=500)
+    name: str = Field(min_length=1, max_length=300)
+    category: str | None = Field(default=None, max_length=100)
+    age: int = Field(default=14, ge=0)
+    skill: int = Field(default=15, ge=0)
+    knight_modifier: int = 0
+    glory: int = Field(default=0, ge=0)
+    description: str | None = None
+    gm_description: str | None = None
+
+
+class SquireServiceRead(ORMModel):
+    id: UUID
+    campaign_id: UUID
+    squire_id: UUID
+    knight_character_id: UUID
+    source_key: str
+    start_year: int
+    end_year: int | None
+    start_event_id: UUID | None
+    end_event_id: UUID | None
+    created_at: datetime
+
+
+class SquireRead(ORMModel):
+    id: UUID
+    campaign_id: UUID
+    character_id: UUID
+    source_key: str
+    created_at: datetime
+
+
+class SquireStateRead(ORMModel):
+    id: UUID
+    campaign_id: UUID
+    squire_id: UUID
+    event_id: UUID | None
+    effective_year: int
+    sequence: int
+    category: str | None
+    age: int
+    skill: int
+    knight_modifier: int
+    glory: int
+    description: str | None
+    gm_description: str | None
+    reason: str | None
+    recorded_at: datetime
+
+
 class FoundryCharacterSnapshot(ORMModel):
     effective_year: int = Field(ge=1, le=9999)
     traits: list[FoundryTraitSnapshot] = Field(default_factory=list, max_length=100)
@@ -332,6 +383,7 @@ class FoundryCharacterSnapshot(ORMModel):
     is_heir: bool = False
     history: list[FoundryHistorySnapshot] | None = Field(default=None, max_length=1000)
     wounds: list[FoundryWoundSnapshot] | None = Field(default=None, max_length=100)
+    squires: list[FoundrySquireSnapshot] | None = Field(default=None, max_length=100)
 
     @model_validator(mode="after")
     def unique_source_keys(self) -> "FoundryCharacterSnapshot":
@@ -347,6 +399,7 @@ class FoundryCharacterSnapshot(ORMModel):
             ("relative", self.relatives or []),
             ("history", self.history or []),
             ("wound", self.wounds or []),
+            ("squire", self.squires or []),
         ):
             keys = [value.source_key for value in values]
             if len(keys) != len(set(keys)):
@@ -376,4 +429,7 @@ class FoundryCharacterSyncResult(ORMModel):
     history_entries_created: int = 0
     winter_records_created: int = 0
     wound_entries_added: int = 0
+    squires_created: int = 0
+    squire_state_entries_added: int = 0
+    squire_service_changes: int = 0
     changed: bool
