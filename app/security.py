@@ -7,7 +7,17 @@ from starlette.responses import JSONResponse, Response
 from starlette.types import ASGIApp
 
 PUBLIC_PATHS = frozenset(
-    {"/health", "/ready", "/docs", "/redoc", "/openapi.json", "/openapi-gpt-play.json"}
+    {
+        "/health",
+        "/ready",
+        "/docs",
+        "/redoc",
+        "/openapi.json",
+        "/openapi-gpt-play.json",
+        "/openapi-gpt-dynasty.json",
+        "/openapi-gpt-winter.json",
+        "/privacy",
+    }
 )
 
 

@@ -1,0 +1,39 @@
+name: Deploy GPT Action gateway
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "action-gateway/**"
+      - ".github/workflows/deploy-action-gateway.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: pendragon-action-gateway-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: action-gateway
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+          cache: npm
+          cache-dependency-path: action-gateway/package-lock.json
+      - run: npm install --global npm@11.6.2
+      - run: npm ci
+      - run: npm test
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 5c214edff77bbcf4dee0445f5e204066
+          workingDirectory: action-gateway
+          command: deploy --config wrangler.jsonc

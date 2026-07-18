@@ -6,7 +6,9 @@ For step-by-step configuration in the Custom GPT editor, see [Connect a Custom G
 
 ## Action configuration
 
-- Campaign Play OpenAPI URL: `https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi-gpt-play.json`
+- Campaign Play OpenAPI URL: `https://play-api.pendragon-chronicle.dwarvenbard.com/openapi.json`
+- Dynasty OpenAPI URL: `https://dynasty-api.pendragon-chronicle.dwarvenbard.com/openapi.json`
+- Winter Phase OpenAPI URL: `https://winter-api.pendragon-chronicle.dwarvenbard.com/openapi.json`
 - Authentication type: API key
 - Authentication location: custom header
 - Header name: `X-API-Key`
@@ -17,6 +19,15 @@ The API key grants GM-level access to the current deployment. Do not expose `gm_
 The Campaign Play schema contains exactly 30 operations for ordinary sessions. Dynasty, Estate,
 and Winter Phase operations remain available in the complete developer API and will be exposed
 through separate focused Actions rather than overloading one GPT toolset.
+
+The Dynasty Action contains 30 operations for family identity and history, relationships, source
+references, inheritance cases and heirs, manor transfers, and the shared lookups needed to resolve
+campaign-owned IDs. Use Campaign Play for ordinary session advancement and Dynasty when a durable
+family or succession fact must be read or appended.
+
+The Winter Phase Action contains 30 operations for annual resolution: Winter records and
+participants, chronicles, character history and wounds, Glory, squires, manor annual results,
+treasury, household employment, tenure, and improvements. Use it when closing an in-game year.
 
 ## Core operating rules
 
@@ -74,6 +85,8 @@ through separate focused Actions rather than overloading one GPT toolset.
 ## Sources of truth
 
 - Campaign Play Action schema: `/openapi-gpt-play.json`
+- Dynasty Action schema: `/openapi-gpt-dynasty.json`
+- Winter Phase Action schema: `/openapi-gpt-winter.json`
 - Complete machine-readable developer schema: `/openapi.json`
 - Versioned schema snapshot: `docs/openapi.json`
 - Domain design and table semantics: `docs/schema.md`

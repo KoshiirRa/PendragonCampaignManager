@@ -39,6 +39,76 @@ GPT_PLAY_OPERATION_IDS = frozenset(
     }
 )
 
+GPT_DYNASTY_OPERATION_IDS = frozenset(
+    {
+        "list_campaigns",
+        "get_campaign",
+        "list_sessions",
+        "list_events",
+        "create_event",
+        "list_characters",
+        "create_character",
+        "get_character",
+        "update_character",
+        "list_character_history",
+        "list_notes",
+        "add_note",
+        "glory_summary",
+        "add_glory",
+        "list_families",
+        "create_family",
+        "list_history",
+        "add_history",
+        "add_membership",
+        "add_marriage",
+        "add_parentage",
+        "list_sources",
+        "create_source",
+        "create_inheritance_case",
+        "add_heir",
+        "transfer_manor",
+        "list_locations",
+        "list_manors",
+        "list_tenures",
+        "get_player_view",
+    }
+)
+
+GPT_WINTER_OPERATION_IDS = frozenset(
+    {
+        "list_campaigns",
+        "get_campaign",
+        "list_sessions",
+        "list_events",
+        "create_event",
+        "list_characters",
+        "get_character",
+        "list_character_history",
+        "list_character_wounds",
+        "glory_summary",
+        "add_glory",
+        "list_squires",
+        "list_squire_states",
+        "list_squire_services",
+        "list_winter_phases",
+        "create_winter_phase",
+        "list_winter_participants",
+        "get_annual_chronicle",
+        "generate_annual_chronicle",
+        "list_manors",
+        "list_annual_resolutions",
+        "create_annual_resolution",
+        "list_treasury",
+        "add_treasury_entry",
+        "list_household_employment",
+        "add_household_employment",
+        "list_tenures",
+        "add_tenure",
+        "list_improvements",
+        "add_improvement",
+    }
+)
+
 
 def _referenced_component_names(value: Any) -> set[str]:
     names: set[str] = set()
@@ -107,25 +177,69 @@ def build_openapi(app: FastAPI) -> dict[str, Any]:
     return schema
 
 
-def build_gpt_play_openapi(app: FastAPI) -> dict[str, Any]:
-    """Return the focused Custom GPT schema for ordinary campaign play."""
+def _build_filtered_openapi(
+    app: FastAPI,
+    operation_ids: frozenset[str],
+    *,
+    title: str,
+    description: str,
+    action_scope: str,
+) -> dict[str, Any]:
     schema = deepcopy(build_openapi(app))
     paths: dict[str, Any] = {}
     for path, path_item in schema.get("paths", {}).items():
         filtered = {
             method: operation
             for method, operation in path_item.items()
-            if isinstance(operation, dict)
-            and operation.get("operationId") in GPT_PLAY_OPERATION_IDS
+            if isinstance(operation, dict) and operation.get("operationId") in operation_ids
         }
         if filtered:
             paths[path] = filtered
     schema["paths"] = paths
-    schema["info"]["title"] = "Pendragon Campaign Play Action"
-    schema["info"]["description"] = (
-        "Focused Custom GPT Action for sessions, events, characters, advancement, "
-        "and read-only campaign context. Historical records remain append-only."
-    )
-    schema["x-chatgpt-instructions"]["action_scope"] = "campaign-play"
+    schema["info"]["title"] = title
+    schema["info"]["description"] = description
+    schema["x-chatgpt-instructions"]["action_scope"] = action_scope
     _prune_component_schemas(schema)
     return schema
+
+
+def build_gpt_play_openapi(app: FastAPI) -> dict[str, Any]:
+    """Return the focused Custom GPT schema for ordinary campaign play."""
+    return _build_filtered_openapi(
+        app,
+        GPT_PLAY_OPERATION_IDS,
+        title="Pendragon Campaign Play Action",
+        description=(
+            "Focused Custom GPT Action for sessions, events, characters, advancement, "
+            "and read-only campaign context. Historical records remain append-only."
+        ),
+        action_scope="campaign-play",
+    )
+
+
+def build_gpt_dynasty_openapi(app: FastAPI) -> dict[str, Any]:
+    """Return the focused Custom GPT schema for family and inheritance history."""
+    return _build_filtered_openapi(
+        app,
+        GPT_DYNASTY_OPERATION_IDS,
+        title="Pendragon Dynasty Action",
+        description=(
+            "Focused Custom GPT Action for families, ancestry, marriages, parentage, "
+            "inheritance, and manor transfers. Historical records remain append-only."
+        ),
+        action_scope="dynasty",
+    )
+
+
+def build_gpt_winter_openapi(app: FastAPI) -> dict[str, Any]:
+    """Return the focused Custom GPT schema for Winter Phase resolution."""
+    return _build_filtered_openapi(
+        app,
+        GPT_WINTER_OPERATION_IDS,
+        title="Pendragon Winter Phase Action",
+        description=(
+            "Focused Custom GPT Action for Winter Phase, annual chronicles, character outcomes, "
+            "squires, and manor economy. Historical records remain append-only."
+        ),
+        action_scope="winter-phase",
+    )

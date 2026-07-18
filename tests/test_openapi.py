@@ -1,7 +1,14 @@
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.openapi import GPT_PLAY_OPERATION_IDS, build_gpt_play_openapi
+from app.openapi import (
+    GPT_DYNASTY_OPERATION_IDS,
+    GPT_PLAY_OPERATION_IDS,
+    GPT_WINTER_OPERATION_IDS,
+    build_gpt_dynasty_openapi,
+    build_gpt_play_openapi,
+    build_gpt_winter_openapi,
+)
 
 
 def test_openapi_contains_foundation_routes() -> None:
@@ -107,3 +114,61 @@ def test_gpt_play_openapi_endpoint_is_public() -> None:
     response = TestClient(app).get("/openapi-gpt-play.json")
     assert response.status_code == 200
     assert response.json()["info"]["title"] == "Pendragon Campaign Play Action"
+
+
+def test_gpt_dynasty_openapi_has_exactly_thirty_focused_operations() -> None:
+    schema = build_gpt_dynasty_openapi(app)
+    operation_ids = {
+        operation["operationId"] for path in schema["paths"].values() for operation in path.values()
+    }
+    assert operation_ids == GPT_DYNASTY_OPERATION_IDS
+    assert len(operation_ids) == 30
+    assert schema["info"]["title"] == "Pendragon Dynasty Action"
+    assert schema["x-chatgpt-instructions"]["action_scope"] == "dynasty"
+
+
+def test_gpt_dynasty_openapi_omits_destructive_and_unrelated_operations() -> None:
+    schema = build_gpt_dynasty_openapi(app)
+    operation_ids = {
+        operation["operationId"] for path in schema["paths"].values() for operation in path.values()
+    }
+    assert "archive_campaign" not in operation_ids
+    assert "archive_character" not in operation_ids
+    assert "create_winter_phase" not in operation_ids
+    assert "create_annual_resolution" not in operation_ids
+    assert "add_treasury_entry" not in operation_ids
+
+
+def test_gpt_dynasty_openapi_endpoint_is_public() -> None:
+    response = TestClient(app).get("/openapi-gpt-dynasty.json")
+    assert response.status_code == 200
+    assert response.json()["info"]["title"] == "Pendragon Dynasty Action"
+
+
+def test_gpt_winter_openapi_has_exactly_thirty_focused_operations() -> None:
+    schema = build_gpt_winter_openapi(app)
+    operation_ids = {
+        operation["operationId"] for path in schema["paths"].values() for operation in path.values()
+    }
+    assert operation_ids == GPT_WINTER_OPERATION_IDS
+    assert len(operation_ids) == 30
+    assert schema["info"]["title"] == "Pendragon Winter Phase Action"
+    assert schema["x-chatgpt-instructions"]["action_scope"] == "winter-phase"
+
+
+def test_gpt_winter_openapi_omits_destructive_and_dynasty_operations() -> None:
+    schema = build_gpt_winter_openapi(app)
+    operation_ids = {
+        operation["operationId"] for path in schema["paths"].values() for operation in path.values()
+    }
+    assert "archive_campaign" not in operation_ids
+    assert "archive_character" not in operation_ids
+    assert "create_inheritance_case" not in operation_ids
+    assert "add_marriage" not in operation_ids
+    assert "transfer_manor" not in operation_ids
+
+
+def test_gpt_winter_openapi_endpoint_is_public() -> None:
+    response = TestClient(app).get("/openapi-gpt-winter.json")
+    assert response.status_code == 200
+    assert response.json()["info"]["title"] == "Pendragon Winter Phase Action"

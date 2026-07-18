@@ -1,8 +1,9 @@
 import pytest
+from fastapi.testclient import TestClient
 from pydantic import SecretStr, ValidationError
 
 from app.config import Settings
-from app.main import health
+from app.main import app, health
 from app.security import api_keys_match
 
 
@@ -30,3 +31,13 @@ def test_production_requires_api_key() -> None:
 def test_production_rejects_local_database() -> None:
     with pytest.raises(ValidationError):
         Settings(_env_file=None, app_env="production", api_key="x" * 32)
+
+
+def test_privacy_policy_is_public_and_complete() -> None:
+    response = TestClient(app).get("/privacy")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+    assert "Pendragon Campaign Manager Privacy Policy" in response.text
+    assert "Information processed" in response.text
+    assert "Retention" in response.text
+    assert "GitHub issue tracker" in response.text

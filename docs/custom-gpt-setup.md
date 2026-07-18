@@ -19,7 +19,10 @@ This is a server-to-server connection. Browser CORS settings for the Foundry VTT
 ## Required values
 
 - API server: `https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app`
-- Campaign Play OpenAPI schema: `https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi-gpt-play.json`
+- Campaign Play OpenAPI schema: `https://play-api.pendragon-chronicle.dwarvenbard.com/openapi.json`
+- Dynasty OpenAPI schema: `https://dynasty-api.pendragon-chronicle.dwarvenbard.com/openapi.json`
+- Winter Phase OpenAPI schema: `https://winter-api.pendragon-chronicle.dwarvenbard.com/openapi.json`
+- Privacy policy: `https://play-api.pendragon-chronicle.dwarvenbard.com/privacy`
 - Authentication header: `X-API-Key`
 - Authentication value: the latest enabled version of the `pendragon-api-key` Google Cloud secret
 
@@ -44,7 +47,7 @@ Do not send the value in chat or paste it into any GPT text field.
 5. Enter the OpenAPI schema URL:
 
    ```text
-   https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi-gpt-play.json
+   https://play-api.pendragon-chronicle.dwarvenbard.com/openapi.json
    ```
 
 6. Confirm that the editor detects 30 API operations without schema errors. The focused Campaign
@@ -61,6 +64,37 @@ Do not send the value in chat or paste it into any GPT text field.
 
 11. Paste the secret value into the API-key field.
 12. Save the authentication configuration and the GPT.
+
+## Add the Dynasty Action
+
+After Campaign Play is working, create a second Action in the same GPT and import:
+
+```text
+https://dynasty-api.pendragon-chronicle.dwarvenbard.com/openapi.json
+```
+
+Configure the same `X-API-Key` custom-header authentication. Dynasty contains 30 focused operations
+for families, ancestry, marriages, parentage, inheritance cases, heirs, manor transfers, and the
+supporting character, event, location, and manor lookups. It intentionally excludes destructive,
+Winter Phase, and estate-economy operations.
+
+For each Action's privacy-policy field, enter:
+
+```text
+https://play-api.pendragon-chronicle.dwarvenbard.com/privacy
+```
+
+## Add the Winter Phase Action
+
+Create a third Action in the same GPT and import:
+
+```text
+https://winter-api.pendragon-chronicle.dwarvenbard.com/openapi.json
+```
+
+Configure the same `X-API-Key` authentication and privacy-policy URL. Winter Phase contains exactly
+30 operations for Winter records and participants, chronicles, character history and wounds, Glory,
+squires, manor annual resolution, treasury, household employment, tenure, and improvements.
 
 The OpenAPI schema declares the same `X-API-Key` security scheme. The key is injected into Action requests by ChatGPT and is not exposed to the model as ordinary instruction text.
 
@@ -134,7 +168,9 @@ Check [API readiness](https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/rea
 
 ## Related documentation
 
-- [Live Campaign Play schema](https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi-gpt-play.json)
+- [Live Campaign Play schema](https://play-api.pendragon-chronicle.dwarvenbard.com/openapi.json)
+- [Live Dynasty schema](https://dynasty-api.pendragon-chronicle.dwarvenbard.com/openapi.json)
+- [Live Winter Phase schema](https://winter-api.pendragon-chronicle.dwarvenbard.com/openapi.json)
 - [Complete developer schema](https://pendragon-campaign-api-wetwnuz4jq-uc.a.run.app/openapi.json)
 - [Versioned OpenAPI snapshot](openapi.json)
 - [ChatGPT Actions operating guide](chatgpt-actions.md)
