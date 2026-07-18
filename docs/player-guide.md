@@ -87,3 +87,14 @@ If a change is missing:
 If the same person or object appears twice, do not delete either record. Tell the Gamemaster so the external identity mapping can be corrected without losing history.
 
 Players should never be asked to share or enter the Campaign Manager API key.
+
+## Campaign chronicle
+
+Players can read the live campaign chronicle at the campaign's assigned subdomain. The current
+Salisbury campaign is available at
+[`salisbury.pendragon-chronicle.dwarvenbard.com`](https://salisbury.pendragon-chronicle.dwarvenbard.com).
+
+The chronicle reads the player-safe database projection when the page is requested, so ordinary
+Foundry synchronization does not require a frontend rebuild or redeployment. The timeline, families,
+places, manors, improvements, special features, and approved maps update as their corresponding
+player-visible database records change. GM-only notes and the backend API key remain server-side.

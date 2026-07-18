@@ -1,10 +1,12 @@
 # Campaign chronicle frontend
 
 This directory contains the player-facing chronicle. It is a vinext/React application deployed to
-Cloudflare Workers, with a private Sites deployment retained only as a prototype preview.
+Cloudflare Workers. The earlier private Sites deployment remains available only at its Sites URL;
+its Salisbury custom-domain binding was removed when production moved to Cloudflare.
 
-The current screen reads the representative development campaign from the FastAPI player-view
-projection. Embedded representative records are retained as a fallback when the API is unavailable.
+The current screen reads live campaign data from the FastAPI player-view projection on every
+request. Embedded representative records are retained only as a resilient design fallback when the
+API is unavailable.
 
 The County Salisbury map is a campaign-approved published reference supplied by the Gamemaster.
 It is identified in the UI as circa 510. Earlier campaign years use separate annotations rather
@@ -40,14 +42,27 @@ responses in the browser. FastAPI enforces visibility for chronicle, family, and
 Never place the backend `X-API-Key` in frontend source or a browser-visible environment variable.
 
 The server-side `/api/campaign` proxy expects `PENDRAGON_API_URL`,
-`PENDRAGON_API_KEY`, and `PENDRAGON_CAMPAIGN_ID`. It requests the API's
-player-safe projection on every page load and keeps the credential out of the browser.
+`PENDRAGON_API_KEY`, `PENDRAGON_CAMPAIGN_DOMAIN`, and `PENDRAGON_CAMPAIGN_ID`. For a recognized
+subdomain it requests `/campaigns/by-slug/{slug}/player-view`; the campaign ID is the fallback when
+the hostname does not provide a slug. It requests the API's player-safe projection on every page
+load and keeps the credential out of the browser.
 Future private campaigns will require scoped player authentication; the current production
 chronicle exposes only the player-safe read projection.
 
 ## Production deployment
 
-`wrangler.production.jsonc` defines the production Worker, wildcard campaign route, and non-secret
-runtime settings. `PENDRAGON_API_KEY` is stored as a Cloudflare Worker secret and is not present in
-the repository. The GitHub Actions deployment requires a repository secret named
-`CLOUDFLARE_API_TOKEN` with permission to deploy Workers and manage Worker routes.
+`wrangler.production.jsonc` defines the production Worker, wildcard campaign route, concrete
+Salisbury custom domain, static assets, generated ES modules, and non-secret runtime settings.
+`PENDRAGON_API_KEY` is stored as a Cloudflare Worker secret and is not present in the repository.
+
+The GitHub Actions deployment requires these repository secrets:
+
+- `CLOUDFLARE_API_TOKEN`: an account API token able to deploy Worker scripts and manage Worker
+  routes for `dwarvenbard.com`;
+- `PENDRAGON_API_KEY`: the backend API key, uploaded to the Worker after each deploy.
+
+The secret-binding step intentionally runs after `wrangler deploy`. Publishing a new Worker version
+without that final step leaves the server-side proxy unable to authenticate to FastAPI.
+
+See [`docs/frontend-deployment.md`](../docs/frontend-deployment.md) for DNS, certificates, campaign
+hostnames, CI behavior, verification, and troubleshooting.
