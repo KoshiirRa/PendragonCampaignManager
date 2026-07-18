@@ -35,6 +35,9 @@ test("wires annual chronicles from the player API into the responsive UI", async
 
   assert.match(page, /chronicles:\s*Array/);
   assert.match(page, /data\.chronicles/);
+  assert.match(page, /people:\s*Array/);
+  assert.match(page, /data\.people/);
+  assert.match(page, /setPeople\(livePeople\)/);
   assert.match(page, /annual-chronicle-sections/);
   assert.match(css, /\.annual-chronicle/);
   assert.match(route, /player-view/);

@@ -73,7 +73,8 @@ The Foundry character snapshot accepts a complete `squires` collection. Each sta
 ## Player-facing projection
 
 `GET /api/v1/campaigns/{campaign_id}/player-view` returns the campaign year,
-player-visible chronicle events, families and memberships, and manors with their
+active, unarchived player knights with player-visible Glory totals, player-visible chronicle
+events, families and memberships, and manors with their
 current holders, improvements, special features, defenses, and the latest published
 annual chronicle for each year. GM-only records
 are excluded. The endpoint still requires the API key and is intended to be
