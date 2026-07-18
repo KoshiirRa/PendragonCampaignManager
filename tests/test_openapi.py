@@ -12,7 +12,8 @@ from app.openapi import (
 
 
 def test_openapi_contains_foundation_routes() -> None:
-    paths = app.openapi()["paths"]
+    document = app.openapi()
+    paths = document["paths"]
     assert "/api/v1/campaigns" in paths
     assert "/api/v1/campaigns/{campaign_id}/sessions" in paths
     assert "/api/v1/campaigns/{campaign_id}/player-view" in paths
@@ -47,6 +48,8 @@ def test_openapi_contains_foundation_routes() -> None:
         in paths
     )
     assert "/api/v1/campaigns/{campaign_id}/manors/{manor_id}/assets/{asset_id}/ledger" in paths
+    player_view = document["components"]["schemas"]["CampaignPlayerView"]
+    assert player_view["properties"]["people"]["items"]["$ref"].endswith("/PlayerPerson")
 
 
 def test_historical_records_have_no_mutation_routes() -> None:

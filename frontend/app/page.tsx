@@ -19,6 +19,7 @@ type ApiItem = { id: string; name: string; description?: string | null; status?:
 type ApiCampaign = {
   current_year: number;
   events: Array<{ id: string; year: number; date?: string | null; event_type: string; title: string; description?: string | null }>;
+  people: Array<{ id: string; name: string; player_name: string; description?: string | null; glory: number }>;
   families: Array<{ id: string; name: string; origin_location?: string | null; motto?: string | null; culture?: string | null; notes?: string | null; members: ApiItem[] }>;
   manors: Array<{ id: string; name: string; holder?: string | null; customary_income?: string | null; population?: number | null; description?: string | null; improvements: ApiItem[]; special_features: ApiItem[]; defenses: ApiItem[] }>;
   chronicles: Array<{ id: string; year: number; revision: number; title: string; opening: string; closing: string; sections: Array<{ character_id: string; heading: string; body: string }> }>;
@@ -97,7 +98,7 @@ const demoEvents: ChronicleEvent[] = [
   },
 ];
 
-const people = [
+const demoPeople = [
   { initials: "SC", name: "Sir Cadry", role: "Player knight", detail: "Household knight of Salisbury", glory: "1,284" },
   { initials: "SE", name: "Sir Elad", role: "Knight", detail: "Marshal of the household", glory: "3,910" },
   { initials: "OS", name: "Oswin", role: "Squire", detail: "In service to Sir Cadry", glory: "42" },
@@ -139,6 +140,7 @@ const filters = ["All", "Battle", "Court", "Family", "Glory", "Winter"] as const
 
 export default function Home() {
   const [events, setEvents] = useState(demoEvents);
+  const [people, setPeople] = useState(demoPeople);
   const [families, setFamilies] = useState(demoFamilies);
   const [manors, setManors] = useState(demoManors);
   const [chronicles, setChronicles] = useState(demoChronicles);
@@ -168,6 +170,13 @@ export default function Home() {
           description: event.description || "",
           people: [],
         }));
+        const livePeople = data.people.map((person) => ({
+          initials: person.name.split(/\s+/).map((part) => part.charAt(0)).join("").slice(0, 2).toUpperCase(),
+          name: person.name,
+          role: "Player knight",
+          detail: person.description || `Played by ${person.player_name}`,
+          glory: person.glory.toLocaleString(),
+        }));
         const liveFamilies = data.families.map((family) => ({
           id: family.id,
           name: family.name,
@@ -195,6 +204,7 @@ export default function Home() {
           defenses: manor.defenses.map((item) => ({ name: item.name, condition: "Recorded", strength: `Defensive value ${item.defensive_value}` })),
         }));
         if (liveEvents.length) setEvents(liveEvents);
+        setPeople(livePeople);
         if (liveFamilies.length) { setFamilies(liveFamilies); setSelectedFamily(liveFamilies[0]); }
         if (liveManors.length) { setManors(liveManors); setSelectedManor(liveManors[0]); }
         if (data.chronicles?.length) setChronicles(data.chronicles);

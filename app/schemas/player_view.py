@@ -13,6 +13,14 @@ class PlayerEvent(ORMModel):
     description: str | None
 
 
+class PlayerPerson(ORMModel):
+    id: UUID
+    name: str
+    player_name: str
+    description: str | None
+    glory: int
+
+
 class PlayerFamilyMember(ORMModel):
     id: UUID
     name: str
@@ -80,6 +88,7 @@ class CampaignPlayerView(ORMModel):
     campaign_name: str
     current_year: int
     events: list[PlayerEvent]
+    people: list[PlayerPerson]
     families: list[PlayerFamily]
     manors: list[PlayerManor]
     chronicles: list[PlayerChronicle]

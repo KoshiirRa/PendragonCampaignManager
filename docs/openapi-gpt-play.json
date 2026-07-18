@@ -1742,6 +1742,13 @@
             "type": "array",
             "title": "Events"
           },
+          "people": {
+            "items": {
+              "$ref": "#/components/schemas/PlayerPerson"
+            },
+            "type": "array",
+            "title": "People"
+          },
           "families": {
             "items": {
               "$ref": "#/components/schemas/PlayerFamily"
@@ -1770,6 +1777,7 @@
           "campaign_name",
           "current_year",
           "events",
+          "people",
           "families",
           "manors",
           "chronicles"
@@ -4723,6 +4731,47 @@
           "description"
         ],
         "title": "PlayerManorItem"
+      },
+      "PlayerPerson": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "player_name": {
+            "type": "string",
+            "title": "Player Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "glory": {
+            "type": "integer",
+            "title": "Glory"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "player_name",
+          "description",
+          "glory"
+        ],
+        "title": "PlayerPerson"
       },
       "SessionCreate": {
         "properties": {

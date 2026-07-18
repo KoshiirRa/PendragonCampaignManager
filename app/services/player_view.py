@@ -1,16 +1,19 @@
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import (
     AnnualChronicle,
     AnnualChronicleSection,
     Character,
+    CharacterKind,
+    CharacterStatus,
     Event,
     EventVisibility,
     Family,
     FamilyMembership,
+    GloryLedger,
     KnowledgeScope,
     Location,
     Manor,
@@ -30,6 +33,7 @@ from app.schemas.player_view import (
     PlayerManor,
     PlayerManorDefense,
     PlayerManorItem,
+    PlayerPerson,
 )
 from app.services.campaigns import get_campaign, get_campaign_by_slug
 
@@ -48,6 +52,37 @@ async def get_player_view(db: AsyncSession, campaign_id: UUID) -> CampaignPlayer
             .order_by(Event.in_game_year, Event.sequence, Event.recorded_at)
         )
     )
+
+    people = (
+        await db.execute(
+            select(Character, func.coalesce(func.sum(GloryLedger.amount), 0))
+            .outerjoin(
+                GloryLedger,
+                and_(
+                    GloryLedger.character_id == Character.id,
+                    GloryLedger.scope.in_(visible_scopes),
+                ),
+            )
+            .where(
+                Character.campaign_id == campaign_id,
+                Character.kind == CharacterKind.PLAYER_KNIGHT,
+                Character.status == CharacterStatus.ALIVE,
+                Character.archived_at.is_(None),
+            )
+            .group_by(Character.id)
+            .order_by(Character.name)
+        )
+    ).all()
+    people_rows = [
+        PlayerPerson(
+            id=character.id,
+            name=character.name,
+            player_name=character.player_name or "Player unrecorded",
+            description=character.public_description,
+            glory=glory or 0,
+        )
+        for character, glory in people
+    ]
 
     families = list(
         await db.scalars(
@@ -239,6 +274,7 @@ async def get_player_view(db: AsyncSession, campaign_id: UUID) -> CampaignPlayer
             )
             for e in events
         ],
+        people=people_rows,
         families=family_rows,
         manors=manor_rows,
         chronicles=chronicle_rows,
