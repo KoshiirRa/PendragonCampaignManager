@@ -13,6 +13,7 @@ from app.api.routes import (
     events_router,
     families_router,
     locations_router,
+    winter_router,
 )
 from app.config import settings
 from app.database import engine
@@ -49,6 +50,7 @@ app.include_router(events_router, prefix=settings.api_prefix)
 app.include_router(characters_router, prefix=settings.api_prefix)
 app.include_router(locations_router, prefix=settings.api_prefix)
 app.include_router(families_router, prefix=settings.api_prefix)
+app.include_router(winter_router, prefix=settings.api_prefix)
 
 
 @app.get("/health", tags=["operations"])

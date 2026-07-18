@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import (
     ArmourProfile,
     Character,
+    CharacterHistoryEntry,
     CharacterInventoryLedger,
     CharacterNote,
     CharacterParentage,
@@ -20,6 +21,7 @@ from app.models import (
     CharacterStatus,
     CharacterStatusLedger,
     CharacterTraitLedger,
+    CharacterWoundLedger,
     Event,
     EventLink,
     EventVisibility,
@@ -37,6 +39,8 @@ from app.models import (
     SkillDefinition,
     TraitDefinition,
     WeaponProfile,
+    WinterPhase,
+    WinterPhaseParticipant,
 )
 from app.schemas.character import (
     CharacterCreate,
@@ -992,6 +996,165 @@ async def sync_foundry_snapshot(
                     )
                 )
 
+    history_entries_created = 0
+    winter_records_created = 0
+    if data.history is not None:
+        existing_history_keys = set(
+            await db.scalars(
+                select(CharacterHistoryEntry.source_key).where(
+                    CharacterHistoryEntry.campaign_id == campaign_id
+                )
+            )
+        )
+        phases = {
+            phase.in_game_year: phase
+            for phase in await db.scalars(
+                select(WinterPhase).where(WinterPhase.campaign_id == campaign_id)
+            )
+        }
+        participant_keys = set(
+            (
+                await db.execute(
+                    select(
+                        WinterPhaseParticipant.winter_phase_id,
+                        WinterPhaseParticipant.character_id,
+                    ).where(WinterPhaseParticipant.campaign_id == campaign_id)
+                )
+            ).all()
+        )
+        for snapshot in data.history:
+            if snapshot.source_key in existing_history_keys:
+                continue
+            is_winter = (snapshot.source or "").casefold() == "winter"
+            history_event = Event(
+                campaign_id=campaign_id,
+                event_type="winter_phase_history" if is_winter else "character_history",
+                title=snapshot.title,
+                description=snapshot.description,
+                in_game_year=snapshot.year,
+                visibility=EventVisibility.PLAYERS,
+                metadata_={
+                    "source": "foundry_vtt",
+                    "foundry_item_uuid": snapshot.source_key,
+                    "reported_glory": snapshot.reported_glory,
+                },
+            )
+            db.add(history_event)
+            await db.flush()
+            history_entry = CharacterHistoryEntry(
+                campaign_id=campaign_id,
+                character_id=character_id,
+                event_id=history_event.id,
+                source_key=snapshot.source_key,
+                in_game_year=snapshot.year,
+                title=snapshot.title,
+                source=snapshot.source,
+                description=snapshot.description,
+                reported_glory=snapshot.reported_glory,
+                favour_value=snapshot.favour_value,
+            )
+            db.add(history_entry)
+            db.add(
+                EventLink(
+                    event_id=history_event.id,
+                    entity_type="character",
+                    entity_id=character_id,
+                )
+            )
+            if snapshot.gm_description:
+                db.add(
+                    CharacterNote(
+                        campaign_id=campaign_id,
+                        character_id=character_id,
+                        event_id=history_event.id,
+                        scope=KnowledgeScope.GM_ONLY,
+                        note_type="foundry_history_gm_info",
+                        title=snapshot.title,
+                        body=snapshot.gm_description,
+                    )
+                )
+            await db.flush()
+            existing_history_keys.add(snapshot.source_key)
+            history_entries_created += 1
+
+            if is_winter:
+                phase = phases.get(snapshot.year)
+                if phase is None:
+                    phase_event = Event(
+                        campaign_id=campaign_id,
+                        event_type="winter_phase",
+                        title=f"Winter Phase {snapshot.year}",
+                        description="Imported from Foundry VTT Winter Phase history",
+                        in_game_year=snapshot.year,
+                        visibility=EventVisibility.PLAYERS,
+                    )
+                    db.add(phase_event)
+                    await db.flush()
+                    phase = WinterPhase(
+                        campaign_id=campaign_id,
+                        event_id=phase_event.id,
+                        in_game_year=snapshot.year,
+                        status="recorded",
+                    )
+                    db.add(phase)
+                    await db.flush()
+                    phases[snapshot.year] = phase
+                    winter_records_created += 1
+                participant_key = (phase.id, character_id)
+                if participant_key not in participant_keys:
+                    db.add(
+                        WinterPhaseParticipant(
+                            campaign_id=campaign_id,
+                            winter_phase_id=phase.id,
+                            character_id=character_id,
+                            history_entry_id=history_entry.id,
+                        )
+                    )
+                    participant_keys.add(participant_key)
+                    winter_records_created += 1
+
+    wound_entries_added = 0
+    if data.wounds is not None:
+        latest_wounds = await _latest_by_key(
+            db,
+            CharacterWoundLedger,
+            CharacterWoundLedger.source_key,
+            CharacterWoundLedger.character_id == character_id,
+        )
+        for snapshot in data.wounds:
+            previous = latest_wounds.get(snapshot.source_key)
+            current = (
+                snapshot.damage,
+                snapshot.treated,
+                snapshot.wound_source,
+                snapshot.description,
+            )
+            if (
+                previous
+                and (
+                    previous.damage,
+                    previous.treated,
+                    previous.wound_source,
+                    previous.description,
+                )
+                == current
+            ):
+                continue
+            pending.append(
+                CharacterWoundLedger(
+                    campaign_id=campaign_id,
+                    character_id=character_id,
+                    source_key=snapshot.source_key,
+                    effective_year=data.effective_year,
+                    damage=snapshot.damage,
+                    treated=snapshot.treated,
+                    wound_source=snapshot.wound_source,
+                    description=snapshot.description,
+                    reason=reason,
+                )
+            )
+            wound_entries_added += 1
+
     event = None
     family_changed = bool(
         relatives_created
@@ -1000,6 +1163,7 @@ async def sync_foundry_snapshot(
         or relationships_created
         or inheritance_records_created
     )
+    domain_changed = bool(history_entries_created or winter_records_created)
     if pending or ownership_pending or family_event_fields or family_changed:
         event = Event(
             campaign_id=campaign_id,
@@ -1059,7 +1223,12 @@ async def sync_foundry_snapshot(
         family_links_created=family_links_created,
         relationships_created=relationships_created,
         inheritance_records_created=inheritance_records_created,
-        changed=bool(pending or ownership_pending or family_event_fields or family_changed),
+        history_entries_created=history_entries_created,
+        winter_records_created=winter_records_created,
+        wound_entries_added=wound_entries_added,
+        changed=bool(
+            pending or ownership_pending or family_event_fields or family_changed or domain_changed
+        ),
     )
 
 

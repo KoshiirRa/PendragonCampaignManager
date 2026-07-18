@@ -17,6 +17,9 @@ def test_openapi_contains_foundation_routes() -> None:
     assert "/api/v1/campaigns/{campaign_id}/inheritance-cases" in paths
     assert "/api/v1/campaigns/{campaign_id}/families/{family_id}/history" in paths
     assert "/api/v1/campaigns/{campaign_id}/source-references" in paths
+    assert "/api/v1/campaigns/{campaign_id}/winter-phases" in paths
+    assert "/api/v1/campaigns/{campaign_id}/characters/{character_id}/history" in paths
+    assert "/api/v1/campaigns/{campaign_id}/characters/{character_id}/wounds" in paths
 
 
 def test_historical_records_have_no_mutation_routes() -> None:
@@ -36,6 +39,10 @@ def test_historical_ledgers_have_no_destructive_routes() -> None:
     history = paths["/api/v1/campaigns/{campaign_id}/families/{family_id}/history"]
     assert "patch" not in history
     assert "delete" not in history
+    character_history = paths["/api/v1/campaigns/{campaign_id}/characters/{character_id}/history"]
+    assert set(character_history) == {"get"}
+    wounds = paths["/api/v1/campaigns/{campaign_id}/characters/{character_id}/wounds"]
+    assert set(wounds) == {"get"}
 
 
 def test_openapi_is_ready_for_chatgpt_actions() -> None:

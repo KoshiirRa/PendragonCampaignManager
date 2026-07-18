@@ -46,6 +46,12 @@ from app.models.possession import (
     InventoryItem,
     WeaponProfile,
 )
+from app.models.winter import (
+    CharacterHistoryEntry,
+    CharacterWoundLedger,
+    WinterPhase,
+    WinterPhaseParticipant,
+)
 
 __all__ = [
     "Base",
@@ -92,4 +98,8 @@ __all__ = [
     "HorseStatLedger",
     "InventoryItem",
     "WeaponProfile",
+    "CharacterHistoryEntry",
+    "CharacterWoundLedger",
+    "WinterPhase",
+    "WinterPhaseParticipant",
 ]

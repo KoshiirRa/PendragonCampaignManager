@@ -136,3 +136,28 @@ def test_foundry_relative_accepts_public_and_gm_descriptions() -> None:
     )
     assert relative.description == "Known at court."
     assert relative.gm_description == "Secret allegiance."
+
+
+def test_foundry_snapshot_accepts_history_and_wounds() -> None:
+    snapshot = FoundryCharacterSnapshot(
+        effective_year=486,
+        glory_total=2000,
+        history=[
+            {
+                "source_key": "Actor.test.Item.history",
+                "year": 485,
+                "title": "Winter Phase",
+                "source": "winter",
+                "reported_glory": 100,
+            }
+        ],
+        wounds=[
+            {
+                "source_key": "Actor.test.Item.wound",
+                "damage": 5,
+                "treated": True,
+            }
+        ],
+    )
+    assert snapshot.history[0].source == "winter"
+    assert snapshot.wounds[0].treated is True

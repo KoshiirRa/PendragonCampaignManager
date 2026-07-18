@@ -48,6 +48,12 @@ The Foundry snapshot endpoint also accepts `family_name`, `relatives`, and `is_h
 
 Relative `description` is synchronized to the NPC's public description. Relative `gm_description` is appended as a `gm_only` character note when its content changes; identical repeated snapshots do not duplicate the note.
 
+# Winter Phase and character history API
+
+List or create annual records at `/campaigns/{campaign_id}/winter-phases`; list participants beneath `/winter-phases/{phase_id}/participants`. Foundry History Items are available at `/characters/{character_id}/history`, and append-only wound states at `/characters/{character_id}/wounds`.
+
+During Foundry synchronization each History Item becomes its own central Event and normalized history entry. Items whose source is `winter` create or reuse the campaign/year Winter Phase and attach the character as a participant. `reported_glory` preserves what the History Item displayed, but does not independently award Glory: snapshot total reconciliation remains authoritative and prevents double counting. History and GM Info use separate player-visible and GM-only records.
+
 Ancestral entries use `POST /families/{family_id}/history`. The service creates the central event automatically and can also create a linked Glory ledger entry when `glory_amount` and `ancestor_character_id` are supplied. Use `GET /families/{family_id}/history?before_year=480` for the pre-480 timeline.
 
 Sources are campaign-owned records at `/source-references`; `source_locator` on each history entry can hold a page, table, section, URL, or other user-defined locator.

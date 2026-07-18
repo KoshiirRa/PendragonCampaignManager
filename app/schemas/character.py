@@ -299,6 +299,25 @@ class FoundryRelativeSnapshot(ORMModel):
         return self
 
 
+class FoundryHistorySnapshot(ORMModel):
+    source_key: str = Field(min_length=1, max_length=500)
+    year: int = Field(ge=1, le=9999)
+    title: str = Field(min_length=1, max_length=300)
+    source: str | None = Field(default=None, max_length=100)
+    description: str | None = None
+    gm_description: str | None = None
+    reported_glory: int = 0
+    favour_value: int = 0
+
+
+class FoundryWoundSnapshot(ORMModel):
+    source_key: str = Field(min_length=1, max_length=500)
+    damage: int = Field(ge=0)
+    treated: bool = False
+    wound_source: str | None = Field(default=None, max_length=100)
+    description: str | None = None
+
+
 class FoundryCharacterSnapshot(ORMModel):
     effective_year: int = Field(ge=1, le=9999)
     traits: list[FoundryTraitSnapshot] = Field(default_factory=list, max_length=100)
@@ -311,6 +330,8 @@ class FoundryCharacterSnapshot(ORMModel):
     family_name: str | None = Field(default=None, min_length=1, max_length=300)
     relatives: list[FoundryRelativeSnapshot] | None = Field(default=None, max_length=500)
     is_heir: bool = False
+    history: list[FoundryHistorySnapshot] | None = Field(default=None, max_length=1000)
+    wounds: list[FoundryWoundSnapshot] | None = Field(default=None, max_length=100)
 
     @model_validator(mode="after")
     def unique_source_keys(self) -> "FoundryCharacterSnapshot":
@@ -324,6 +345,8 @@ class FoundryCharacterSnapshot(ORMModel):
             ("inventory", self.inventory or []),
             ("horse", self.horses or []),
             ("relative", self.relatives or []),
+            ("history", self.history or []),
+            ("wound", self.wounds or []),
         ):
             keys = [value.source_key for value in values]
             if len(keys) != len(set(keys)):
@@ -350,4 +373,7 @@ class FoundryCharacterSyncResult(ORMModel):
     family_links_created: int = 0
     relationships_created: int = 0
     inheritance_records_created: int = 0
+    history_entries_created: int = 0
+    winter_records_created: int = 0
+    wound_entries_added: int = 0
     changed: bool

@@ -2984,6 +2984,275 @@
         }
       }
     },
+    "/api/v1/campaigns/{campaign_id}/winter-phases": {
+      "get": {
+        "tags": [
+          "winter-phase"
+        ],
+        "summary": "List Winter Phases",
+        "operationId": "list_winter_phases",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Campaign Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WinterPhaseRead"
+                  },
+                  "title": "Response List Winter Phases"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "winter-phase"
+        ],
+        "summary": "Create Winter Phase",
+        "operationId": "create_winter_phase",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Campaign Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WinterPhaseCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WinterPhaseRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaigns/{campaign_id}/winter-phases/{phase_id}/participants": {
+      "get": {
+        "tags": [
+          "winter-phase"
+        ],
+        "summary": "List Winter Participants",
+        "operationId": "list_winter_participants",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Campaign Id"
+            }
+          },
+          {
+            "name": "phase_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Phase Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WinterParticipantRead"
+                  },
+                  "title": "Response List Winter Participants"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaigns/{campaign_id}/characters/{character_id}/history": {
+      "get": {
+        "tags": [
+          "winter-phase"
+        ],
+        "summary": "List Character History",
+        "operationId": "list_character_history",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Campaign Id"
+            }
+          },
+          {
+            "name": "character_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Character Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CharacterHistoryRead"
+                  },
+                  "title": "Response List Character History"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaigns/{campaign_id}/characters/{character_id}/wounds": {
+      "get": {
+        "tags": [
+          "winter-phase"
+        ],
+        "summary": "List Character Wounds",
+        "operationId": "list_character_wounds",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Campaign Id"
+            }
+          },
+          {
+            "name": "character_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Character Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CharacterWoundRead"
+                  },
+                  "title": "Response List Character Wounds"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": [
@@ -3392,6 +3661,93 @@
           "name"
         ],
         "title": "CharacterCreate"
+      },
+      "CharacterHistoryRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "campaign_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campaign Id"
+          },
+          "character_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Character Id"
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Event Id"
+          },
+          "source_key": {
+            "type": "string",
+            "title": "Source Key"
+          },
+          "in_game_year": {
+            "type": "integer",
+            "title": "In Game Year"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "reported_glory": {
+            "type": "integer",
+            "title": "Reported Glory"
+          },
+          "favour_value": {
+            "type": "integer",
+            "title": "Favour Value"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "campaign_id",
+          "character_id",
+          "event_id",
+          "source_key",
+          "in_game_year",
+          "title",
+          "source",
+          "description",
+          "reported_glory",
+          "favour_value",
+          "created_at"
+        ],
+        "title": "CharacterHistoryRead"
       },
       "CharacterNoteCreate": {
         "properties": {
@@ -4042,6 +4398,112 @@
         },
         "type": "object",
         "title": "CharacterUpdate"
+      },
+      "CharacterWoundRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "campaign_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campaign Id"
+          },
+          "character_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Character Id"
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Id"
+          },
+          "source_key": {
+            "type": "string",
+            "title": "Source Key"
+          },
+          "effective_year": {
+            "type": "integer",
+            "title": "Effective Year"
+          },
+          "sequence": {
+            "type": "integer",
+            "title": "Sequence"
+          },
+          "damage": {
+            "type": "integer",
+            "title": "Damage"
+          },
+          "treated": {
+            "type": "boolean",
+            "title": "Treated"
+          },
+          "wound_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wound Source"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Recorded At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "campaign_id",
+          "character_id",
+          "event_id",
+          "source_key",
+          "effective_year",
+          "sequence",
+          "damage",
+          "treated",
+          "wound_source",
+          "description",
+          "reason",
+          "recorded_at"
+        ],
+        "title": "CharacterWoundRead"
       },
       "DiceLogCreate": {
         "properties": {
@@ -5505,6 +5967,36 @@
             "type": "boolean",
             "title": "Is Heir",
             "default": false
+          },
+          "history": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FoundryHistorySnapshot"
+                },
+                "type": "array",
+                "maxItems": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "History"
+          },
+          "wounds": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FoundryWoundSnapshot"
+                },
+                "type": "array",
+                "maxItems": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wounds"
           }
         },
         "type": "object",
@@ -5608,6 +6100,21 @@
             "title": "Inheritance Records Created",
             "default": 0
           },
+          "history_entries_created": {
+            "type": "integer",
+            "title": "History Entries Created",
+            "default": 0
+          },
+          "winter_records_created": {
+            "type": "integer",
+            "title": "Winter Records Created",
+            "default": 0
+          },
+          "wound_entries_added": {
+            "type": "integer",
+            "title": "Wound Entries Added",
+            "default": 0
+          },
           "changed": {
             "type": "boolean",
             "title": "Changed"
@@ -5625,6 +6132,79 @@
           "changed"
         ],
         "title": "FoundryCharacterSyncResult"
+      },
+      "FoundryHistorySnapshot": {
+        "properties": {
+          "source_key": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Source Key"
+          },
+          "year": {
+            "type": "integer",
+            "maximum": 9999.0,
+            "minimum": 1.0,
+            "title": "Year"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "gm_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gm Description"
+          },
+          "reported_glory": {
+            "type": "integer",
+            "title": "Reported Glory",
+            "default": 0
+          },
+          "favour_value": {
+            "type": "integer",
+            "title": "Favour Value",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_key",
+          "year",
+          "title"
+        ],
+        "title": "FoundryHistorySnapshot"
       },
       "FoundryHorseSnapshot": {
         "properties": {
@@ -6154,6 +6734,55 @@
           "opposed_value"
         ],
         "title": "FoundryTraitSnapshot"
+      },
+      "FoundryWoundSnapshot": {
+        "properties": {
+          "source_key": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Source Key"
+          },
+          "damage": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Damage"
+          },
+          "treated": {
+            "type": "boolean",
+            "title": "Treated",
+            "default": false
+          },
+          "wound_source": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wound Source"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_key",
+          "damage"
+        ],
+        "title": "FoundryWoundSnapshot"
       },
       "GloryCreate": {
         "properties": {
@@ -9361,6 +9990,147 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WinterParticipantRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "campaign_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campaign Id"
+          },
+          "winter_phase_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Winter Phase Id"
+          },
+          "character_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Character Id"
+          },
+          "history_entry_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "History Entry Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "campaign_id",
+          "winter_phase_id",
+          "character_id",
+          "history_entry_id",
+          "created_at"
+        ],
+        "title": "WinterParticipantRead"
+      },
+      "WinterPhaseCreate": {
+        "properties": {
+          "in_game_year": {
+            "type": "integer",
+            "maximum": 9999.0,
+            "minimum": 1.0,
+            "title": "In Game Year"
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Status",
+            "default": "recorded"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "in_game_year"
+        ],
+        "title": "WinterPhaseCreate"
+      },
+      "WinterPhaseRead": {
+        "properties": {
+          "in_game_year": {
+            "type": "integer",
+            "maximum": 9999.0,
+            "minimum": 1.0,
+            "title": "In Game Year"
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Status",
+            "default": "recorded"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "campaign_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campaign Id"
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Event Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "in_game_year",
+          "id",
+          "campaign_id",
+          "event_id",
+          "created_at"
+        ],
+        "title": "WinterPhaseRead"
       }
     },
     "securitySchemes": {

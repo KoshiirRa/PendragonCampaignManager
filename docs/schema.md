@@ -83,6 +83,12 @@ Foundry family synchronization stores external source keys on memberships, paren
 
 The family Item Description becomes the relative character's public description. GM Info is preserved separately as an append-only `gm_only` character note, preventing private material from leaking through player-visible character fields.
 
+## Winter Phase, history, and wounds
+
+`character_history_entries` gives every imported Foundry History Item a durable source identity and dedicated central Event. Its `reported_glory` is provenance rather than a second Glory award; this keeps the Glory ledger normalized when Foundry also supplies a total.
+
+`winter_phases` represents one annual campaign phase per year, while `winter_phase_participants` links each synchronized character and its originating history entry. Births and child deaths continue through the effective family and character-status records rather than being duplicated here. `character_wound_ledger` appends a new state only when damage, treatment, source, or description changes.
+
 Inheritance is represented as a case with candidate heirs and explicit asset transfers. Recording an inherited manor closes its current tenure and opens the beneficiary's tenure in the same database transaction, linked to the transfer event.
 
 `family_history_entries` supports year-by-year ancestral histories before or after 480. Every entry creates a central event and may link an ancestor, realm, source citation, dice log, and Glory ledger entry. Source title, edition, locator, summary, roll results, and arbitrary metadata are user-entered fields. The application contains no sourcebook prose or built-in sourcebook tables.
