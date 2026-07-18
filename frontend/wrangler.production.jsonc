@@ -18,6 +18,10 @@
   },
   "routes": [
     {
+      "pattern": "salisbury.pendragon-chronicle.dwarvenbard.com",
+      "custom_domain": true
+    },
+    {
       "pattern": "*.pendragon-chronicle.dwarvenbard.com/*",
       "zone_name": "dwarvenbard.com"
     }
