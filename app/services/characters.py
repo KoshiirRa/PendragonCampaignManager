@@ -493,6 +493,7 @@ async def sync_foundry_snapshot(
             metadata_={"source": "foundry_vtt", "foundry_uuid": character.foundry_uuid},
         )
         db.add(event)
+        await db.flush()
         db.add(EventLink(event_id=event.id, entity_type="character", entity_id=character_id))
         for item in pending:
             item.event_id = event.id
