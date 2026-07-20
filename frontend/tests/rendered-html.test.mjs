@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import test from "node:test";
 
 async function render() {
@@ -42,4 +42,26 @@ test("wires annual chronicles from the player API into the responsive UI", async
   assert.match(css, /\.annual-chronicle/);
   assert.match(route, /player-view/);
   assert.match(route, /cache:\s*"no-store"/);
+});
+
+test("serves responsive map variants without the runtime image optimizer", async () => {
+  const response = await render();
+  const html = await response.text();
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const generatedMaps = [
+    "logres-player-map-circa-510-640.avif",
+    "logres-player-map-circa-510-1240.webp",
+    "salisbury-county-circa-510-640.avif",
+    "salisbury-county-circa-510-2400.webp",
+  ];
+
+  assert.doesNotMatch(html, /\/_vinext\/image/);
+  assert.match(html, /<picture>/);
+  assert.match(html, /logres-player-map-circa-510-640\.avif 640w/);
+  assert.match(page, /salisbury-county-circa-510-2400\.webp 2400w/);
+
+  for (const filename of generatedMaps) {
+    const file = await stat(new URL(`../public/maps/${filename}`, import.meta.url));
+    assert.ok(file.size > 0, `${filename} should be a non-empty generated map`);
+  }
 });
