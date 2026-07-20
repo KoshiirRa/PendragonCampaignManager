@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 
 type ChronicleEvent = {
   id: string;
@@ -346,13 +345,51 @@ export default function Home() {
         <div className="map-layout">
           {mapView === "logres" ? (
             <div className={`map-frame kingdom-map era-${mapYear}`}>
-              <Image src="/maps/logres-player-map-circa-510.jpg" width={1240} height={1619} priority alt="Player map of Britain and Logres, circa 510" />
+              <picture>
+                <source
+                  type="image/avif"
+                  srcSet="/maps/logres-player-map-circa-510-640.avif 640w, /maps/logres-player-map-circa-510-960.avif 960w, /maps/logres-player-map-circa-510-1240.avif 1240w"
+                  sizes="(max-width: 900px) 100vw, 70vw"
+                />
+                <source
+                  type="image/webp"
+                  srcSet="/maps/logres-player-map-circa-510-640.webp 640w, /maps/logres-player-map-circa-510-960.webp 960w, /maps/logres-player-map-circa-510-1240.webp 1240w"
+                  sizes="(max-width: 900px) 100vw, 70vw"
+                />
+                <img
+                  src="/maps/logres-player-map-circa-510.jpg"
+                  width={1240}
+                  height={1619}
+                  loading="lazy"
+                  decoding="async"
+                  alt="Player map of Britain and Logres, circa 510"
+                />
+              </picture>
               <div className="map-period-label"><b>{mapYear}</b><span>{mapYear === 485 ? "Uther period context" : "Boy King reference"}</span></div>
               <button className="salisbury-focus" onClick={() => setMapView("salisbury")} aria-label="Open detailed map of Salisbury"><i /><span>Salisbury<br /><small>Open county map →</small></span></button>
             </div>
           ) : (
             <div className={`map-frame era-${mapYear}`}>
-              <Image src="/maps/salisbury-county-circa-510.jpg" width={2400} height={1545} priority alt="Illustrated map of County Salisbury and the surrounding lands, circa 510" />
+              <picture>
+                <source
+                  type="image/avif"
+                  srcSet="/maps/salisbury-county-circa-510-640.avif 640w, /maps/salisbury-county-circa-510-1200.avif 1200w, /maps/salisbury-county-circa-510-2000.avif 2000w, /maps/salisbury-county-circa-510-2400.avif 2400w"
+                  sizes="(max-width: 900px) 100vw, 70vw"
+                />
+                <source
+                  type="image/webp"
+                  srcSet="/maps/salisbury-county-circa-510-640.webp 640w, /maps/salisbury-county-circa-510-1200.webp 1200w, /maps/salisbury-county-circa-510-2000.webp 2000w, /maps/salisbury-county-circa-510-2400.webp 2400w"
+                  sizes="(max-width: 900px) 100vw, 70vw"
+                />
+                <img
+                  src="/maps/salisbury-county-circa-510.jpg"
+                  width={2400}
+                  height={1545}
+                  loading="lazy"
+                  decoding="async"
+                  alt="Illustrated map of County Salisbury and the surrounding lands, circa 510"
+                />
+              </picture>
               <div className="map-period-label"><b>{mapYear}</b><span>{mapYear === 485 ? "Uther period overlay" : "Boy King reference"}</span></div>
               {mapPlaces.map((place, index) => (
                 <button key={place.id} className={`map-marker ${selectedPlace.id === place.id ? "active" : ""}`} style={{ left: `${place.x}%`, top: `${place.y}%` }} onClick={() => setSelectedPlace(place)} aria-label={`View ${place.name}`}><span>{index + 1}</span></button>
