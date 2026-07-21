@@ -7,7 +7,8 @@ A PostgreSQL/FastAPI backend designed as durable memory for multi-generational P
 The implemented backend covers campaigns, sessions, the central event timeline, dice logs,
 characters and historical values, Glory, locations and manors, families and inheritance,
 ancestral history, Foundry synchronization, possessions, Winter history, manor economics and
-households, and squires. Numbered migrations currently run through `017_squires.sql`.
+households, squires, and annual player chronicles. Numbered migrations currently run through
+`019_secure_public_schema.sql`.
 
 ## Setup
 
@@ -43,3 +44,11 @@ code. Pushes to `main` that change the frontend or its deployment workflow autom
 build, deploy, and restore the Worker secret binding.
 
 For containerized hosting, secrets, migration jobs, and the deployment pipeline, see the [Google Cloud Run deployment guide](docs/cloud-run.md).
+
+## Security boundary
+
+FastAPI is the sole supported data-access boundary. Supabase's `public` tables have Row-Level
+Security enabled without direct Data API policies, and the `anon` and `authenticated` roles have no
+table or sequence privileges. Browser clients, Foundry, and Custom GPT Actions must call the
+authenticated FastAPI or gateway endpoints; they must never receive database credentials or a
+Supabase service-role key.

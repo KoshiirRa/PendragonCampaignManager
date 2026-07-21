@@ -71,7 +71,11 @@ Locations form a campaign-scoped hierarchy and may also have graph connections f
 | `manor_improvements` | Stable improvement identities |
 | `manor_improvement_ledger` | Improvement status and economic history |
 
-Cross-domain integrity that cannot be expressed by a simple foreign key (for example, confirming a session and event belong to the same campaign) is enforced in the service layer. Supabase Row Level Security policies will be introduced with authentication, rather than shipping permissive placeholder policies.
+Cross-domain integrity that cannot be expressed by a simple foreign key (for example, confirming a
+session and event belong to the same campaign) is enforced in the service layer. All `public` tables
+have Row-Level Security enabled with no Data API policies, and `anon`/`authenticated` privileges are
+revoked. This intentionally makes direct Supabase access deny-by-default; campaign authorization and
+all application access remain behind FastAPI.
 
 The attached legacy archive design treated Markdown as canonical. In this backend, normalized PostgreSQL records are canonical; future Markdown and ZIP archives will be reproducible, scope-filtered exports.
 

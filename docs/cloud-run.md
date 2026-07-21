@@ -79,4 +79,8 @@ The service permits unauthenticated Cloud Run invocation because Foundry runs in
 
 Cloud Run can route traffic back to an earlier service revision, but database migrations are forward-only operationally. Do not run Alembic downgrades against Supabase during an automated rollback. Make schema changes backward-compatible across at least one application revision, and correct deployed schemas with new migrations.
 
+The runtime database role is trusted and connects directly to PostgreSQL. Supabase Data API roles
+are separately denied by RLS and revoked privileges; do not substitute an `anon` key or expose the
+runtime connection string to Foundry, a browser, or Custom GPT Actions.
+
 Do not run the pipeline against a populated project until the baseline migration has been tested against a disposable Supabase project.

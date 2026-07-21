@@ -21,6 +21,11 @@ py -3.12 scripts/export_openapi.py
 
 The SQL migrations remain the deployment source of truth for Supabase. Alembic owns model-drift detection and future generated revisions; never edit an already deployed numbered migration.
 
+All application tables are private behind FastAPI. Do not add permissive Supabase RLS policies or
+grant `anon`/`authenticated` direct access as part of a domain slice. If direct Data API access ever
+becomes a requirement, model campaign membership first and introduce narrowly scoped policies in a
+separate reviewed security slice.
+
 When the player chronicle changes, also validate its independent toolchain:
 
 ```powershell

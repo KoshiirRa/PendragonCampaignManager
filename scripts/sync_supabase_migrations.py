@@ -36,6 +36,8 @@ MIGRATION_MAP = {
     ROOT / "migrations/017_squires.sql": ROOT / "supabase/migrations/202607170017_squires.sql",
     ROOT / "migrations/018_annual_chronicles.sql": ROOT
     / "supabase/migrations/202607180018_annual_chronicles.sql",
+    ROOT / "migrations/019_secure_public_schema.sql": ROOT
+    / "supabase/migrations/202607210019_secure_public_schema.sql",
 }
 SEED_SOURCES = (ROOT / "seed/001_campaign.sql", ROOT / "seed/002_characters_and_manor.sql")
 SEED_DESTINATION = ROOT / "supabase/seed.sql"
