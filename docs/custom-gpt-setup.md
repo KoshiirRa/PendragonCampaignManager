@@ -98,6 +98,11 @@ squires, manor annual resolution, treasury, household employment, tenure, and im
 
 The OpenAPI schema declares the same `X-API-Key` security scheme. The key is injected into Action requests by ChatGPT and is not exposed to the model as ordinary instruction text.
 
+Event creation is explicitly marked `x-openai-isConsequential: false` in every Action schema so the
+Gamemaster can append campaign events without ChatGPT's per-call approval dialog. This exception is
+limited to `create_event`; all other write operations retain ChatGPT's default approval behavior.
+Events remain append-only, and corrections must use a superseding event.
+
 ## Recommended GPT instructions
 
 Add behavioral guidance similar to the following to the Custom GPT's instructions. Do not include credentials.

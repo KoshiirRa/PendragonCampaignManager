@@ -109,6 +109,8 @@ GPT_WINTER_OPERATION_IDS = frozenset(
     }
 )
 
+NON_CONSEQUENTIAL_OPERATION_IDS = frozenset({"create_event"})
+
 
 def _referenced_component_names(value: Any) -> set[str]:
     names: set[str] = set()
@@ -161,6 +163,13 @@ def build_openapi(app: FastAPI) -> dict[str, Any]:
         for operation in schema.get("paths", {}).get(path, {}).values():
             if isinstance(operation, dict):
                 operation["security"] = []
+    for path_item in schema.get("paths", {}).values():
+        for operation in path_item.values():
+            if (
+                isinstance(operation, dict)
+                and operation.get("operationId") in NON_CONSEQUENTIAL_OPERATION_IDS
+            ):
+                operation["x-openai-isConsequential"] = False
     schema["x-chatgpt-instructions"] = {
         "purpose": "Persistent memory for multi-generational Pendragon campaigns.",
         "rules": [

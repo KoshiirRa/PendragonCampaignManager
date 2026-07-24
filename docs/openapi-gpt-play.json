@@ -434,7 +434,8 @@
               }
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       }
     },
     "/api/v1/campaigns/{campaign_id}/dice-logs": {

@@ -5,10 +5,13 @@ from app.openapi import (
     GPT_DYNASTY_OPERATION_IDS,
     GPT_PLAY_OPERATION_IDS,
     GPT_WINTER_OPERATION_IDS,
+    NON_CONSEQUENTIAL_OPERATION_IDS,
     build_gpt_dynasty_openapi,
     build_gpt_play_openapi,
     build_gpt_winter_openapi,
 )
+
+EVENTS_PATH = "/api/v1/campaigns/{campaign_id}/events"
 
 
 def test_openapi_contains_foundation_routes() -> None:
@@ -88,6 +91,20 @@ def test_openapi_is_ready_for_chatgpt_actions() -> None:
     assert len(operation_ids) == len(set(operation_ids))
     assert schema["servers"][0]["url"]
     assert schema["x-chatgpt-instructions"]["rules"]
+
+
+def test_event_creation_is_non_consequential_in_all_action_schemas() -> None:
+    schemas = (
+        app.openapi(),
+        build_gpt_play_openapi(app),
+        build_gpt_dynasty_openapi(app),
+        build_gpt_winter_openapi(app),
+    )
+    assert NON_CONSEQUENTIAL_OPERATION_IDS == {"create_event"}
+    for schema in schemas:
+        create_event = schema["paths"][EVENTS_PATH]["post"]
+        assert create_event["operationId"] == "create_event"
+        assert create_event["x-openai-isConsequential"] is False
 
 
 def test_gpt_play_openapi_has_exactly_thirty_focused_operations() -> None:
