@@ -13,9 +13,15 @@ def test_supabase_files_match_canonical_sql() -> None:
 
 
 def test_supabase_migrations_have_ordered_versions() -> None:
-    versions = [path.name.split("_", 1)[0] for path in Path("supabase/migrations").glob("*.sql")]
-    assert versions == sorted(versions)
-    assert len(versions) == len(set(versions))
+    expected_versions = [
+        destination.name.split("_", 1)[0] for destination in MIGRATION_MAP.values()
+    ]
+    actual_versions = sorted(
+        path.name.split("_", 1)[0] for path in Path("supabase/migrations").glob("*.sql")
+    )
+
+    assert actual_versions == expected_versions
+    assert len(actual_versions) == len(set(actual_versions))
 
 
 def test_supabase_seed_combines_canonical_seed_files() -> None:
