@@ -2,6 +2,10 @@
 
 Cloud Run hosts the stateless FastAPI container. Supabase remains the PostgreSQL system of record. The same image is used for the web service and a finite migration job.
 
+The production image uses Python 3.14. Pull requests validate the application on Python 3.12,
+3.13, and 3.14, apply the full migration chain to PostgreSQL 15, and build the production container
+before the image is eligible for the deployment pipeline.
+
 ## Deployment order
 
 The included `cloudbuild.yaml` performs these steps in order:

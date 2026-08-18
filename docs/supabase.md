@@ -7,8 +7,8 @@ The hosted project is linked locally through the Supabase CLI. Project reference
 Incremental SQL files under `migrations/` remain canonical. Supabase requires migrations under `supabase/migrations/`, so a deterministic synchronization script produces byte-identical copies:
 
 ```powershell
-py -3.12 scripts/sync_supabase_migrations.py
-py -3.12 scripts/sync_supabase_migrations.py --check
+py -3.14 scripts/sync_supabase_migrations.py
+py -3.14 scripts/sync_supabase_migrations.py --check
 ```
 
 Never edit the generated Supabase copies directly. Add a new canonical numbered migration, extend `MIGRATION_MAP`, synchronize, and test.

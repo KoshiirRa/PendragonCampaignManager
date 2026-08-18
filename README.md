@@ -12,10 +12,12 @@ households, squires, and annual player chronicles. Numbered migrations currently
 
 ## Setup
 
-Requirements: Python 3.12 and PostgreSQL 15+ (a local Supabase stack is suitable).
+Requirements: Python 3.14 and PostgreSQL 15+ (a local Supabase stack is suitable).
+The test suite also runs on Python 3.12 and 3.13 during the migration window so existing
+development environments receive an explicit compatibility signal.
 
 ```powershell
-py -3.12 -m venv .venv
+py -3.14 -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
 Copy-Item .env.example .env

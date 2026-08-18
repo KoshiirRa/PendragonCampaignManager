@@ -8,7 +8,7 @@ This project is a long-term campaign database, not a save-file converter. Preser
 
 ## Technology requirements
 
-- Python 3.12
+- Python 3.14 for production, with Python 3.12 and 3.13 compatibility checked during the migration window
 - PostgreSQL and Supabase
 - Incremental SQL migrations
 - SQLAlchemy 2.x with async sessions
@@ -144,11 +144,11 @@ SQLite is not an adequate substitute for PostgreSQL-specific integration tests b
 Before considering a slice complete, run:
 
 ```powershell
-py -3.12 -m ruff format .
-py -3.12 -m ruff check .
-py -3.12 -m pytest -q
-py -3.12 -m alembic heads
-py -3.12 -m compileall -q app migrations tests
+py -3.14 -m ruff format .
+py -3.14 -m ruff check .
+py -3.14 -m pytest -q
+py -3.14 -m alembic heads
+py -3.14 -m compileall -q app migrations tests
 ```
 
 Do not hide an earlier command failure by chaining commands in a way that returns only the final command's exit status.
