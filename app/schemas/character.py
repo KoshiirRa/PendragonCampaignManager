@@ -1,3 +1,4 @@
+import builtins
 from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
@@ -259,13 +260,15 @@ class FoundryInventorySnapshot(ORMModel):
 
 
 class FoundryHorseSnapshot(ORMModel):
-    source_key: str = Field(min_length=1, max_length=500)
-    name: str = Field(min_length=1, max_length=300)
-    breed: str | None = None
-    colour: str | None = None
-    personality: str | None = None
-    features: str | None = None
-    description: str | None = None
+    # The Foundry field named ``str`` shadows the built-in while Python 3.14
+    # evaluates the class's deferred annotations, so qualify string types here.
+    source_key: builtins.str = Field(min_length=1, max_length=500)
+    name: builtins.str = Field(min_length=1, max_length=300)
+    breed: builtins.str | None = None
+    colour: builtins.str | None = None
+    personality: builtins.str | None = None
+    features: builtins.str | None = None
+    description: builtins.str | None = None
     siz: int = Field(default=0, ge=0)
     dex: int = Field(default=0, ge=0)
     str: int = Field(default=0, ge=0)
