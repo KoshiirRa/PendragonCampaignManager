@@ -20,6 +20,21 @@ This project is a long-term campaign database, not a save-file converter. Preser
 
 Do not replace these technologies without explicit user approval.
 
+## Development environment and tooling
+
+- Target the Ubuntu 26.04 LTS development VM at `dev-vm` (`10.42.42.54`).
+- Use Bash (`/bin/bash`) and native Linux tools such as `rsync`, `find`, `grep`, `jq`, `systemctl`, and `docker`.
+- Use Python 3.14 from `~/.antigravity-env/bin/python3` or through `uv`.
+- Use Node.js 22 from `~/.nvm/versions/node/v22.23.2/bin`.
+- Use only Linux POSIX paths such as `/home/marty/...`; never use Windows paths in commands or documentation for local development.
+- Keep repository text files in LF (`\n`) format with strict POSIX-compliant line endings.
+
+## Agent roles
+
+- Antigravity (`agy`) is the primary architect for multi-file refactoring, subagent delegation, infrastructure updates, and deep codebase research.
+- Codex is the secondary pair-programmer for targeted inline edits, unit tests, and fast code reviews.
+- Keep commits focused with clean commit messages, and run `git status` before completing a task.
+
 ## Repository structure
 
 Keep code within the established layout:
@@ -141,14 +156,15 @@ Every vertical slice should test, as applicable:
 
 SQLite is not an adequate substitute for PostgreSQL-specific integration tests because this project uses PostgreSQL types and behavior.
 
-Before considering a slice complete, run:
+Before considering a slice complete, run each command separately:
 
-```powershell
-py -3.14 -m ruff format .
-py -3.14 -m ruff check .
-py -3.14 -m pytest -q
-py -3.14 -m alembic heads
-py -3.14 -m compileall -q app migrations tests
+```bash
+~/.antigravity-env/bin/python3 -m ruff format .
+~/.antigravity-env/bin/python3 -m ruff check .
+~/.antigravity-env/bin/python3 -m pytest -q
+~/.antigravity-env/bin/python3 -m alembic heads
+~/.antigravity-env/bin/python3 -m compileall -q app migrations tests
+git status --short --branch
 ```
 
 Do not hide an earlier command failure by chaining commands in a way that returns only the final command's exit status.
